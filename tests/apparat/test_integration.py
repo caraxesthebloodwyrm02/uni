@@ -31,7 +31,9 @@ def test_full_pipeline_basic():
 
     # Register the handlers we need
     register_phase_handler("initiate", signature={})(initiate_handler)
-    register_phase_handler("scale", signature={"factor": float}, param_map=["factor"])(scale_handler)
+    register_phase_handler("scale", signature={"factor": float}, param_map=["factor"])(
+        scale_handler
+    )
     register_phase_handler("normalize", signature={})(normalize_handler)
     register_phase_handler("complete", signature={})(complete_handler)
 
@@ -64,7 +66,9 @@ def test_complex_pipeline_with_multiple_params():
     register_phase_handler(
         "clamp", signature={"min_val": float, "max_val": float}, param_map=["min_val", "max_val"]
     )(clamp_handler)
-    register_phase_handler("filter", signature={"threshold": float}, param_map=["threshold"])(filter_handler)
+    register_phase_handler("filter", signature={"threshold": float}, param_map=["threshold"])(
+        filter_handler
+    )
     register_phase_handler("invert", signature={})(invert_handler)
 
     # Execute pipeline
@@ -232,7 +236,9 @@ def test_pipeline_data_flow():
 
     # Register handlers that transform data in predictable ways
     register_phase_handler("initiate", signature={})(initiate_handler)
-    register_phase_handler("scale", signature={"factor": float}, param_map=["factor"])(scale_handler)
+    register_phase_handler("scale", signature={"factor": float}, param_map=["factor"])(
+        scale_handler
+    )
     register_phase_handler("invert", signature={})(invert_handler)
 
     # Execute pipeline
