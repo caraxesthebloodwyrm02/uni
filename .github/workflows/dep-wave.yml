@@ -1,0 +1,87 @@
+name: Dep Wave
+
+on:
+  workflow_dispatch:
+    inputs:
+      repos:
+        description: 'Comma-separated list of repos to check (e.g., owner/repo1,owner/repo2)'
+        required: true
+        default: 'caraxesthebloodwyrm02/mangrove'
+      tier:
+        description: 'Risk tier to process (patch, minor, major, all)'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - all
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    outputs:
+      pr_count: ${{ steps.inventory.outputs.count }}
+      pr_json: ${{ steps.inventory.outputs.pr_json }}
+    steps:
+      - name: Inventory Dependabot PRs
+        id: inventory
+        run: |
+          REPOS="${{ github.event.inputs.repos }}"
+          TIER="${{ github.event.inputs.tier }}"
+          
+          echo "=== Inventory for: $REPOS ==="
+          echo "Tier filter: $TIER"
+          
+          PRS=$(gh pr list --repo $REPOS --author "app/dependabot" --json number,title,headRefName,createdAt --limit 50 2>/dev/null || echo "[]")
+          COUNT=$(echo "$PRS" | jq 'length')
+          
+          echo "count=$COUNT" >> $GITHUB_OUTPUT
+          echo "pr_json=$PRS" >> $GITHUB_OUTPUT
+          
+          echo "Found $COUNT Dependabot PRs"
+          echo "$PRS" | jq -r '.[] | "\(.number): \(.title)"'
+
+  ci-gate:
+    runs-on: ubuntu-latest
+    needs: inventory
+    if: needs.inventory.outputs.pr_count != '0'
+    steps:
+      - name: Check CI status for PRs
+        id: ci_check
+        run: |
+          REPOS="${{ github.event.inputs.repos }}"
+          PRS="${{ needs.inventory.outputs.pr_json }}"
+          
+          echo "$PRS" | jq -r '.[] | .number' | while read pr_num; do
+            echo "=== Checking CI for PR #$pr_num ==="
+            gh pr checks $pr_num --repo $REPOS || echo "No CI checks found"
+          done
+
+  merge:
+    runs-on: ubuntu-latest
+    needs: [inventory, ci-gate]
+    if: needs.inventory.outputs.pr_count != '0'
+    steps:
+      - name: Determine merge candidates
+        id: candidates
+        run: |
+          TIER="${{ github.event.inputs.tier }}"
+          echo "Processing tier: $TIER"
+          
+          # This is a safety check - actual merging requires human approval
+          echo "⚠️  Auto-merge disabled for safety"
+          echo "Run manual merge commands after review"
+
+  report:
+    runs-on: ubuntu-latest
+    needs: [inventory, ci-gate]
+    if: always()
+    steps:
+      - name: Generate Dep Wave Report
+        run: |
+          echo "## Dep Wave Report — $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Inventoried" >> $GITHUB_STEP_SUMMARY
+          echo "- ${{ needs.inventory.outputs.pr_count }} PRs across ${{ github.event.inputs.repos }}" >> $GITHUB_STEP_SUMMARY

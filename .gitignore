@@ -1,0 +1,45 @@
+# mangrove — Python + ecosystem ignores
+
+# Bytecode / cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Virtualenvs / uv
+.venv/
+venv/
+.uv-cache/
+
+# Build / dist
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+
+# Node (when packages under productivity/ or platform/ grow)
+node_modules/
+.next/
+.turbo/
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Operational artifacts
+htmlcov/
+.coverage
+coverage.xml
+*.sqlite
+*.sqlite-journal
+.dependency-metrics.json
+.dependency-pr-metrics/
+
+# Large files
+scripts/corpus-index.tsv

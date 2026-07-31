@@ -1,0 +1,26 @@
+Mangrove — Compliance Notice
+============================
+
+This product includes software developed by:
+
+  • Irfan Kabir — primary author.
+  • The Mangrove ecosystem contributors — see git log for the
+    authoritative author list per file.
+\ la
+Project layout
+--------------
+  Live tree  : /home/cable/series/mangrove/        (stub, this repo)
+  Canonical  : /home/irfankabir/                   (538 GB volume,
+                                                   UUID cf656878-be07-4249-b8ba-10fd482aa610,
+                                                   currently unmounted
+                                                   from this session)
+
+Build / runtime
+--------------
+  Python interpreter : /home/cable/local/bin/python3.13
+                       (CPython 3.13.14, user-space build)
+  License of build   : PSF License — see /home/cable/local/lib/python3.13/LICENSE.txt
+
+Licensed under the Apache License, Version 2.0. See LICENSE in this directory
+for the full text. Required attribution notices for redistributions are
+preserved per §4a of that license.
