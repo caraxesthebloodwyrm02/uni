@@ -8,17 +8,17 @@ root_dir = os.path.abspath(os.path.join(current_dir, "../../../"))
 sys.path.insert(0, root_dir)
 
 try:
-    from mangrove.platform.apparat.apparat import (
+    from apparat.apparat import (
         PHASE_REGISTRY,
         register_phase_handler,
     )
-    from mangrove.platform.apparat.horizontal_texture_processor import HorizontalTextureProcessor
-    from mangrove.platform.apparat.sisa import sisa, to_jsonable
+    from apparat.horizontal_texture_processor import HorizontalTextureProcessor
+    from apparat.sisa import sisa, to_jsonable
 except ImportError as e:
     print(f"Error importing Apparat components: {e}")
     raise e
 
-from mangrove.platform.mcp.constraints_engine import ConstraintsEngine  # noqa: E402
+from mcp.constraints_engine import ConstraintsEngine  # noqa: E402
 
 
 def initialize_apparat():

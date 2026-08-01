@@ -1,6 +1,6 @@
 import sys
 
-from mangrove.platform.mcp.apparat_logic import (  # type: ignore
+from mcp.apparat_logic import (  # type: ignore
     list_apparat_phases,
     run_apparat_phase,
     search_constraints,
