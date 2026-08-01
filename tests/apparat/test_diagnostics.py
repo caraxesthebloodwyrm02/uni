@@ -1,8 +1,7 @@
 import pytest
-
-from mangrove.platform.apparat.api import GridCell
-from mangrove.platform.apparat.apparat import PHASE_REGISTRY
-from mangrove.platform.apparat.horizontal_texture_processor import HorizontalTextureProcessor
+from apparat.api import GridCell
+from apparat.apparat import PHASE_REGISTRY
+from apparat.horizontal_texture_processor import HorizontalTextureProcessor
 
 # Only test handlers registered by apparat.py at import time that are pure
 # grid-cell transformations.  This isolates diagnostics from:

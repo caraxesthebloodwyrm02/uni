@@ -1,8 +1,7 @@
 import pytest
-
-from mangrove.platform.apparat.api import ApparatValidationError
-from mangrove.platform.apparat.apparat import register_phase_handler
-from mangrove.platform.apparat.horizontal_texture_processor import HorizontalTextureProcessor
+from apparat.api import ApparatValidationError
+from apparat.apparat import register_phase_handler
+from apparat.horizontal_texture_processor import HorizontalTextureProcessor
 
 
 def test_invalid_syntax():
