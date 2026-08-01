@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mangrove"
-version = "0.1.0"
+version = "0.2.0"
 description = "Multi-area Python workspace for the Mangrove ecosystem"
 readme = "CLAUDE.md"
 requires-python = ">=3.13,<3.14"
@@ -25,20 +25,22 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "pytest>=8.3.0,<9",
     "pytest-cov>=7.1.0,<8",
+    "pytest>=8.3.0,<9",
     "ruff>=0.4.0,<1",
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["platform"]
+packages = ["mangrove_platform"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = ["--strict-markers", "-p", "no:anyio"]
+pythonpath = ["mangrove_platform"]
+addopts = ["--strict-markers", "-p", "no:anyio", "--cov=mangrove_platform", "--cov-report=term", "--cov-report=html", "--cov-report=xml"]
 
 [tool.coverage.run]
-source = ["platform"]
+source = ["mangrove_platform"]
+data_file = ".coverage"
 omit = [
     "tests/*",
     "*/__pycache__/*",
@@ -54,5 +56,6 @@ line-length = 100
 target-version = "py313"
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "UP", "B"]
+select = ["B", "E", "F", "I", "UP", "W"]
 ignore = ["E501"]
+

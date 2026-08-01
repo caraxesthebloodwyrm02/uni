@@ -6,7 +6,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../platform"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../mangrove_platform"))
 
 from apparat.api import GridCell
 from apparat.horizontal_texture_processor import HorizontalTextureProcessor
@@ -27,7 +27,9 @@ def test_initiate_handler_basic():
 
     assert len(result) == 12, f"Expected 12 cells (4x3), got {len(result)}"
     assert all(cell.value == 0.0 for cell in result), "All cells should have value 0.0"
-    assert all(cell.texture_type == "empty" for cell in result), "All cells should have texture_type 'empty'"
+    assert all(cell.texture_type == "empty" for cell in result), (
+        "All cells should have texture_type 'empty'"
+    )
 
     # Check coordinate assignment
     for y in range(3):
@@ -51,7 +53,9 @@ def test_initiate_handler_different_resolutions():
     for width, height, expected_count in test_cases:
         processor = HorizontalTextureProcessor(width, height)
         result = initiate_handler(processor, {})
-        assert len(result) == expected_count, f"Expected {expected_count} cells for {width}x{height}"
+        assert len(result) == expected_count, (
+            f"Expected {expected_count} cells for {width}x{height}"
+        )
 
     print("PASS: test_initiate_handler_different_resolutions")
 

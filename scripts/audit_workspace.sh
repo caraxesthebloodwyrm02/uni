@@ -26,7 +26,7 @@ while IFS= read -r -d '' dir; do
         empty_count=$((empty_count + 1))
         echo "  EMPTY: ${dir#${ROOT}/}"
     fi
-done < <(find "${ROOT}" -type d -print0)
+done < <(find "${ROOT}" -type d -not -path "*/.git*" -not -path "*/.venv*" -not -path "*/.*_cache*" -print0)
 
 echo "================================"
 echo "Total directories: ${total_dirs}"

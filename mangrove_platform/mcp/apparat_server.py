@@ -1,6 +1,9 @@
 from mcp.server.fastmcp import FastMCP  # type: ignore
 
-from mangrove.platform.mcp import apparat_logic  # type: ignore
+try:
+    from . import apparat_logic  # type: ignore
+except ImportError:
+    import apparat_logic  # type: ignore
 
 # Create the MCP server
 mcp = FastMCP("Apparat-Server")

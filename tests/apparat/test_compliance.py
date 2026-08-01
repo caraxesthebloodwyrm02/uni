@@ -178,6 +178,7 @@ def test_compliance_preserves_input_data():
 
         # Set some input data
         from apparat.api import GridCell
+
         processor.ipo.input_data = [
             GridCell(0, 0, 1.0, "test"),
             GridCell(1, 0, 2.0, "test"),

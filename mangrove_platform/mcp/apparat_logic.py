@@ -4,21 +4,28 @@ from typing import Any
 
 # Ensure we are in the mangrove root for imports
 current_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = os.path.abspath(os.path.join(current_dir, "../../../"))
-sys.path.insert(0, root_dir)
+platform_dir = os.path.abspath(os.path.join(current_dir, "../"))
+mangrove_dir = os.path.abspath(os.path.join(current_dir, "../../"))
+if platform_dir not in sys.path:
+    sys.path.insert(0, platform_dir)
+if mangrove_dir not in sys.path:
+    sys.path.insert(0, mangrove_dir)
 
 try:
-    from mangrove.platform.apparat.apparat import (
+    from apparat.apparat import (
         PHASE_REGISTRY,
         register_phase_handler,
     )
-    from mangrove.platform.apparat.horizontal_texture_processor import HorizontalTextureProcessor
-    from mangrove.platform.apparat.sisa import sisa, to_jsonable
+    from apparat.horizontal_texture_processor import HorizontalTextureProcessor
+    from apparat.sisa import sisa, to_jsonable
 except ImportError as e:
     print(f"Error importing Apparat components: {e}")
     raise e
 
-from mangrove.platform.mcp.constraints_engine import ConstraintsEngine  # noqa: E402
+try:
+    from .constraints_engine import ConstraintsEngine  # noqa: E402
+except ImportError:
+    from constraints_engine import ConstraintsEngine  # noqa: E402
 
 
 def initialize_apparat():
@@ -27,7 +34,7 @@ def initialize_apparat():
     Populates the registry with both built-in and specialized phase handlers.
     """
     # 1. Register specialized handlers from phase_handlers.py
-    from mangrove.platform.apparat.phase_handlers import (
+    from apparat.phase_handlers import (
         combine_handler,
         complete_handler,
         compliance_baseline_handler,
@@ -51,7 +58,7 @@ def initialize_apparat():
 
 
 # Initialize the constraints engine
-constraints_engine = ConstraintsEngine(root_dir=os.path.join(root_dir, "mangrove"))
+constraints_engine = ConstraintsEngine(root_dir=mangrove_dir)
 
 # Global processor to maintain state across MCP tool calls
 _GLOBAL_PROCESSOR: HorizontalTextureProcessor | None = None

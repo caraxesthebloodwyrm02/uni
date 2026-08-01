@@ -6,7 +6,7 @@ root = Path(__file__).resolve().parent.parent.parent.parent
 if str(root) not in sys.path:
     sys.path.insert(0, str(root))
 
-from mangrove.platform.mcp import apparat_logic  # noqa: E402
+from mcp import apparat_logic  # noqa: E402
 
 
 def test_pipeline_success():

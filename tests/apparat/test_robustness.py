@@ -1,8 +1,7 @@
 import pytest
-
-from mangrove.platform.apparat.api import ApparatValidationError
-from mangrove.platform.apparat.apparat import register_phase_handler
-from mangrove.platform.apparat.horizontal_texture_processor import HorizontalTextureProcessor
+from apparat.api import ApparatValidationError
+from apparat.apparat import register_phase_handler
+from apparat.horizontal_texture_processor import HorizontalTextureProcessor
 
 
 def test_invalid_syntax():
@@ -150,8 +149,8 @@ def test_type_error_casting():
 
 def test_scale_highlight_failure_suppression():
     """Test that an exception in the secondary highlight handler during scale is suppressed."""
-    from mangrove.platform.apparat.api import GridCell
-    from mangrove.platform.apparat.apparat import PHASE_REGISTRY
+    from apparat.api import GridCell
+    from apparat.apparat import PHASE_REGISTRY
 
     # Temporarily replace highlight handler with one that raises Exception
     original = PHASE_REGISTRY.get("highlight")

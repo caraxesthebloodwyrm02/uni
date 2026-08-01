@@ -1,7 +1,7 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../platform"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../mangrove_platform"))
 
 import pytest
 from apparat.api import GridCell

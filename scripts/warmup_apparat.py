@@ -10,13 +10,18 @@ from pathlib import Path
 
 # Ensure we can import from the mangrove root
 current_dir = Path(__file__).resolve().parent
-root_dir = current_dir.parent.parent  # /home/cable/series/mangrove
-sys.path.insert(0, str(root_dir.parent))  # Add /home/cable/series to path
+mangrove_dir = current_dir.parent
+platform_dir = mangrove_dir / "mangrove_platform"
+mcp_dir = platform_dir / "mcp"
+
+for d in (str(mcp_dir), str(platform_dir), str(mangrove_dir)):
+    if d not in sys.path:
+        sys.path.insert(0, d)
 
 try:
-    from mangrove.platform.apparat.apparat import list_registered_phases
-    from mangrove.platform.apparat.horizontal_texture_processor import HorizontalTextureProcessor
-    from mangrove.platform.mcp.apparat_logic import initialize_apparat
+    from apparat.apparat import list_registered_phases
+    from apparat.horizontal_texture_processor import HorizontalTextureProcessor
+    from apparat_logic import initialize_apparat
 except ImportError as e:
     print(f"CRITICAL: Failed to import Apparat components: {e}")
     sys.exit(1)

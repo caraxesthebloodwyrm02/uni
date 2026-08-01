@@ -2,13 +2,15 @@ import sys
 from pathlib import Path
 
 # Ensure mangrove root is in sys.path
-root = Path(__file__).resolve().parent.parent.parent.parent
-if str(root) not in sys.path:
-    sys.path.insert(0, str(root))
+mangrove_dir = Path(__file__).resolve().parent.parent.parent
+platform_dir = mangrove_dir / "mangrove_platform"
+for d in (str(platform_dir), str(mangrove_dir)):
+    if d not in sys.path:
+        sys.path.insert(0, d)
 
-from mangrove.platform.apparat.api import ApparatValidationError  # noqa: E402
-from mangrove.platform.apparat.apparat import register_phase_handler  # noqa: E402
-from mangrove.platform.apparat.horizontal_texture_processor import (  # noqa: E402
+from apparat.api import ApparatValidationError  # noqa: E402
+from apparat.apparat import register_phase_handler  # noqa: E402
+from apparat.horizontal_texture_processor import (  # noqa: E402
     HorizontalTextureProcessor,
 )
 
