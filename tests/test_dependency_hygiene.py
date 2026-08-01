@@ -53,10 +53,23 @@ def test_dependency_tracking():
         metrics["has_pyproject"] = False
         print("No pyproject.toml found")
 
-    # Save metrics
+    # Save metrics (append to history)
     metrics_file = Path(__file__).parent.parent / ".dependency-metrics.json"
+    
+    history = []
+    if metrics_file.exists():
+        try:
+            with open(metrics_file, "r") as f:
+                history = json.load(f)
+                if not isinstance(history, list):
+                    history = [history]  # migrate old single-object format
+        except json.JSONDecodeError:
+            pass  # start fresh if corrupted
+            
+    history.append(metrics)
+    
     with open(metrics_file, "w") as f:
-        json.dump(metrics, f, indent=2)
+        json.dump(history, f, indent=2)
 
     print(f"\nMetrics saved to: {metrics_file}")
     print("\n=== Phase 1 Monitoring Complete ===")
