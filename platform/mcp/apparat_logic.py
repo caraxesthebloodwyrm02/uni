@@ -4,8 +4,12 @@ from typing import Any
 
 # Ensure we are in the mangrove root for imports
 current_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = os.path.abspath(os.path.join(current_dir, "../../../"))
-sys.path.insert(0, root_dir)
+platform_dir = os.path.abspath(os.path.join(current_dir, "../"))
+mangrove_dir = os.path.abspath(os.path.join(current_dir, "../../"))
+if platform_dir not in sys.path:
+    sys.path.insert(0, platform_dir)
+if mangrove_dir not in sys.path:
+    sys.path.insert(0, mangrove_dir)
 
 try:
     from apparat.apparat import (
@@ -18,7 +22,10 @@ except ImportError as e:
     print(f"Error importing Apparat components: {e}")
     raise e
 
-from mcp.constraints_engine import ConstraintsEngine  # noqa: E402
+try:
+    from .constraints_engine import ConstraintsEngine  # noqa: E402
+except ImportError:
+    from constraints_engine import ConstraintsEngine  # noqa: E402
 
 
 def initialize_apparat():
@@ -51,7 +58,7 @@ def initialize_apparat():
 
 
 # Initialize the constraints engine
-constraints_engine = ConstraintsEngine(root_dir=os.path.join(root_dir, "mangrove"))
+constraints_engine = ConstraintsEngine(root_dir=mangrove_dir)
 
 # Global processor to maintain state across MCP tool calls
 _GLOBAL_PROCESSOR: HorizontalTextureProcessor | None = None
