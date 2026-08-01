@@ -5,10 +5,14 @@ from pathlib import Path
 # Setup paths
 current_dir = Path(__file__).resolve().parent
 root_dir = current_dir.parent
-sys.path.insert(0, str(root_dir))
+platform_dir = root_dir / "platform"
+mcp_dir = platform_dir / "mcp"
+for d in (str(mcp_dir), str(platform_dir), str(root_dir)):
+    if d not in sys.path:
+        sys.path.insert(0, d)
 
-from platform.apparat.horizontal_texture_processor import HorizontalTextureProcessor  # noqa: E402
-from platform.mcp.apparat_logic import initialize_apparat  # noqa: E402
+from apparat.horizontal_texture_processor import HorizontalTextureProcessor  # noqa: E402
+from apparat_logic import initialize_apparat  # noqa: E402
 
 
 def profile_pipeline(width, height):
