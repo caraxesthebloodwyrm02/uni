@@ -35,6 +35,7 @@ packages = ["platform"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 addopts = ["--strict-markers", "-p", "no:anyio"]
 
 [tool.coverage.run]
