@@ -36,10 +36,11 @@ packages = ["mangrove_platform"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["mangrove_platform"]
-addopts = ["--strict-markers", "-p", "no:anyio", "--cov=mangrove_platform", "--cov-report=term", "--cov-report=html"]
+addopts = ["--strict-markers", "-p", "no:anyio", "--cov=mangrove_platform", "--cov-report=term", "--cov-report=html", "--cov-report=xml"]
 
 [tool.coverage.run]
 source = ["mangrove_platform"]
+data_file = ".coverage"
 omit = [
     "tests/*",
     "*/__pycache__/*",

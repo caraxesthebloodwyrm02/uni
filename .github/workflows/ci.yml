@@ -60,7 +60,9 @@ jobs:
         if: always()
         with:
           name: coverage-reports
-          path: .coverage.*
+          path: |
+            coverage.xml
+            htmlcov/
 
   dependency-gate:
     runs-on: ubuntu-latest
