@@ -149,8 +149,8 @@ def test_type_error_casting():
 
 def test_scale_highlight_failure_suppression():
     """Test that an exception in the secondary highlight handler during scale is suppressed."""
-    from mangrove.platform.apparat.api import GridCell
-    from mangrove.platform.apparat.apparat import PHASE_REGISTRY
+    from apparat.api import GridCell
+    from apparat.apparat import PHASE_REGISTRY
 
     # Temporarily replace highlight handler with one that raises Exception
     original = PHASE_REGISTRY.get("highlight")

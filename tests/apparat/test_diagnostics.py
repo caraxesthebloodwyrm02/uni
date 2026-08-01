@@ -109,7 +109,7 @@ def test_resolution_transitions(processor_4x4, processor_8x8):
     and produces the correct number of cells.
     """
     # Test 4x4
-    from mangrove.platform.apparat.phase_handlers import initiate_handler
+    from apparat.phase_handlers import initiate_handler
 
     res_4 = initiate_handler(processor_4x4, {})
     assert len(res_4) == 4 * 4
