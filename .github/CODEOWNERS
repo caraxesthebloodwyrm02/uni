@@ -11,7 +11,8 @@ pyproject.toml @caraxesthebloodwyrm02 @irfankabir02
 uv.lock @caraxesthebloodwyrm02 @irfankabir02
 
 # Security and compliance - both maintainers
-.github/SECURITY.md @caraxesthebloodwyrm02 @irfankabir02
+docs/SECURITY.md @caraxesthebloodwyrm02 @irfankabir02
+docs/SECURITY_GUIDE.md @caraxesthebloodwyrm02 @irfankabir02
 .github/CODEOWNERS @caraxesthebloodwyrm02 @irfankabir02
 .github/dependabot.yml @caraxesthebloodwyrm02 @irfankabir02
 .gitignore @caraxesthebloodwyrm02 @irfankabir02
