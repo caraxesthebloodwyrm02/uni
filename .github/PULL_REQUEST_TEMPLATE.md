@@ -46,6 +46,12 @@
 
 <!-- Any additional context or considerations -->
 
+## License Compliance
+
+- [ ] Changes compatible with MIT License
+- [ ] No license violations introduced
+- [ ] New dependencies compatible with MIT License
+
 ## Compliance Notes
 
 - [ ] 3PAA-SHADOW containment rules followed

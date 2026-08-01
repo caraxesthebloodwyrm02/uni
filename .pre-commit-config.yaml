@@ -1,0 +1,90 @@
+# Pre-commit configuration for Mangrove repository
+# https://pre-commit.com for more information
+
+repos:
+  # General pre-commit hooks
+  - repo: local
+    hooks:
+      - id: forbidden-domains
+        name: Check for forbidden domains (3PAA-SHADOW)
+        entry: bash scripts/check-forbidden-patterns.sh
+        language: system
+        pass_filenames: false
+        files: \.(py|toml|yaml|yml|json)$
+
+      - id: trailing-whitespace
+        name: Trim trailing whitespace
+        entry: trailing-whitespace-fixer
+        language: system
+        types: [text]
+
+      - id: end-of-file-fixer
+        name: Fix end of files
+        entry: end-of-file-fixer
+        language: system
+        types: [text]
+
+      - id: check-yaml
+        name: Check YAML syntax
+        entry: yamllint
+        language: system
+        types: [yaml]
+
+      - id: check-toml
+        name: Check TOML syntax
+        entry: check-json
+        language: system
+        types: [toml]
+
+  # Python-specific hooks
+  - repo: local
+    hooks:
+      - id: ruff-lint
+        name: Run ruff linting
+        entry: uv run ruff check --fix
+        language: system
+        types: [python]
+        pass_filenames: true
+
+      - id: ruff-format
+        name: Run ruff formatting
+        entry: uv run ruff format
+        language: system
+        types: [python]
+        pass_filenames: true
+
+      - id: check-added-large-files
+        name: Check for large files
+        entry: bash scripts/check-large-files.sh
+        language: system
+        pass_filenames: false
+
+  # Security hooks
+  - repo: local
+    hooks:
+      - id: check-secrets
+        name: Check for potential secrets
+        entry: bash scripts/check-secrets.sh
+        language: system
+        pass_filenames: false
+        files: \.(py|toml|yaml|yml|json)$
+
+# Global settings
+default_language_version:
+  python: python3.13
+
+# Global excludes
+exclude: |
+  (?x)^(
+      \.venv/
+    | \.git/
+    | \.mypy_cache/
+    | \.pytest_cache/
+    | \.ruff_cache/
+    | htmlcov/
+    | coverage\.xml
+    | \.coverage
+    | .*\.egg-info/
+    | build/
+    | dist/
+  )

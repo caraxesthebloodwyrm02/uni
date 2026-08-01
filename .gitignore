@@ -43,3 +43,13 @@ coverage.xml
 
 # Large files
 scripts/corpus-index.tsv
+
+# Transcript files (Claude Code sessions)
+commit.txt
+sixtasks.txt
+*.session.log
+
+# Temporary files
+*.tmp
+*.temp
+*.bak

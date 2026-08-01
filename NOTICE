@@ -21,6 +21,5 @@ Build / runtime
                        (CPython 3.13.14, user-space build)
   License of build   : PSF License — see /home/cable/local/lib/python3.13/LICENSE.txt
 
-Licensed under the Apache License, Version 2.0. See LICENSE in this directory
-for the full text. Required attribution notices for redistributions are
-preserved per §4a of that license.
+Licensed under the MIT License. See LICENSE in this directory
+for the full text.

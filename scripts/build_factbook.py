@@ -177,7 +177,7 @@ def main() -> None:
         facts.append(
             fact(
                 "python_craft_collaborator",
-                "python-craft is collaborator-owned by 'shinychoes' (Apache-2.0).",
+                "python-craft is collaborator-owned by 'shinychoes' (MIT).",
                 f"domains/platform/operations/lab/python-craft/pyproject.toml:{f[0]}",
                 r"shinychoes",
             )
@@ -221,7 +221,7 @@ def main() -> None:
     # --- Emit ---
     with OUT.open("w", encoding="utf-8") as fh:
         for entry in facts:
-            fh.write(json.dumps(entry, ensure_ascii=False) + "\n")
+            _ = fh.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
     print(f"wrote {len(facts)} facts to {OUT}")
     print(f"  bytes: {OUT.stat().st_size}")

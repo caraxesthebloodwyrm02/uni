@@ -1,3 +1,4 @@
+# mypy: disable-error-code=name-defined,reportConstantRedefinition,import-not-found
 """Machine-readable runtime validation for the acceleration system.
 Spliced from canonical archive for workspace bootstrap.
 """
@@ -18,35 +19,39 @@ try:
     )
 except ImportError:
     # Fallbacks for the bootstrap's initial 'smoke test' phase
-    SLICES = (4, 16, 64)
-    FOCAL_POINT = 16
-    DEFAULT_CYCLES = 10
-    DEFAULT_CRUISE_TARGET = 70.0
+    # These are runtime fallbacks that work but confuse type checkers
+    SLICES = (4, 16, 64)  # type: ignore[assignment]
+    FOCAL_POINT = 16  # type: ignore[assignment]
+    DEFAULT_CYCLES = 10  # type: ignore[assignment]
+    DEFAULT_CRUISE_TARGET = 70.0  # type: ignore[assignment]
 
 # We use a simple mock if the engine is not yet bootstrapped
 # to allow the 'tripwire' routing test to pass.
 try:
-    from .engine import RefractiveLens  # type: ignore
-    from .wrappers import AccelerationWrapper  # type: ignore
+    from .engine import RefractiveLens  # type: ignore[import-not-found]
+    from .wrappers import AccelerationWrapper  # type: ignore[import-not-found]
 except ImportError:
 
     class RefractiveLens:
         def __init__(self):
             self.focal_point = 16
 
+    class CruiseController:
+        engaged: bool = True
+
+    class Condition:
+        cruise_controller: CruiseController
+
+    class Core:
+        condition: Condition
+
     class AccelerationWrapper:
+        core: Core
+
         def __init__(self, **kwargs):
-            self.core = type(
-                "obj",
-                (object,),
-                {
-                    "condition": type(
-                        "obj",
-                        (object,),
-                        {"cruise_controller": type("obj", (object,), {"engaged": True})},
-                    )
-                },
-            )()
+            self.core = Core()
+            self.core.condition = Condition()
+            self.core.condition.cruise_controller = CruiseController()
 
         def execute_production_cycle(self):
             yield {"interval": 50.0}

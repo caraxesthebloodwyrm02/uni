@@ -1,0 +1,10 @@
+branch_name,last_commit_date,last_commit_hash,last_commit_message,pr_number,pr_title,pr_state,pr_created_at,pr_updated_at,ci_status,mergeable,mergeable_state,review_comments,approvals,files_changed,additions,deletions,has_conflicts,days_since_update
+agents/greeting-response-handler,2026-08-01T09:52:19+06:00,d9beeecd0ddda0c896fd081154cd3d8f838dd828,Create SECURITY.md (#10),,,,,,,,,0,0,,0,0,false,0
+agents/origin-main-pipeline-jobs-did-not-pass-at,2026-08-01T05:42:04+06:00,a22a3f8dc0ad709f09d872d0eb80f77941ba55b6,chore(deps): add Dependabot configuration and baseline monitoring,,,,,,,,,0,0,,0,0,false,0
+agents/origin-main-pipeline-jobs-did-not-pass-at-8c424a5e,2026-08-01T05:42:04+06:00,a22a3f8dc0ad709f09d872d0eb80f77941ba55b6,chore(deps): add Dependabot configuration and baseline monitoring,,,,,,,,,0,0,,0,0,false,0
+chore/hygiene-cleanup,2026-08-01T10:22:49+06:00,a04113691b25775bfcd1ad2eb7510503792283b3,fix(implementation): update phase_handlers.py to generate Apache-2.0 license to match tests,,,,,,,,,0,0,0,0,0,false,0
+dependabot/uv/pytest-9.1.1,2026-08-01T09:33:09+06:00,627b6246d2baca11aecda5d3c4cbb5367640070c,style(tests): fix import formatting for ruff I001 compliance,,,,,,,,,0,0,2,23,15,false,0
+fix/dependency-telemetry-append,2026-08-01T09:02:47+06:00,49c36c33ce5ff37a18a576510b93a340e5d6ad01,fix(ci): generate coverage XML and upload HTML reports,,,,,,,,,0,0,20,890,104,false,0
+fix/test-licence-expectations,2026-08-01T10:15:25+06:00,08a0cede7598fa37097867a3c867ca1f7eb92421,fix(validation): update workspace validation to check .github/SECURITY.md,,,,,,,,,0,0,1,383,484,false,0
+origin-main,2026-08-01T09:52:19+06:00,d9beeecd0ddda0c896fd081154cd3d8f838dd828,Create SECURITY.md (#10),,,,,,,,,0,0,,0,0,false,0
+pr-12,2026-08-01T10:15:25+06:00,08a0cede7598fa37097867a3c867ca1f7eb92421,fix(validation): update workspace validation to check .github/SECURITY.md,,,,,,,,,0,0,1,383,484,false,0

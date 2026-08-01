@@ -8,9 +8,9 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../mangrove_platform"))
 
-from apparat.api import GridCell
-from apparat.horizontal_texture_processor import HorizontalTextureProcessor
-from apparat.phase_handlers import (
+from mangrove_platform.apparat.api import GridCell
+from mangrove_platform.apparat.horizontal_texture_processor import HorizontalTextureProcessor
+from mangrove_platform.apparat.phase_handlers import (
     combine_handler,
     complete_handler,
     compliance_baseline_handler,
@@ -228,7 +228,7 @@ def test_compliance_baseline_handler_with_temp_dir():
         processor.ipo.compliance_root = temp_dir
         processor.ipo.input_data = []
 
-        compliance_baseline_handler(processor, {})
+        _ = compliance_baseline_handler(processor, {})
 
         # Check that files were created
         license_path = Path(temp_dir) / "LICENSE"
@@ -241,7 +241,7 @@ def test_compliance_baseline_handler_with_temp_dir():
 
         # Check file contents
         license_content = license_path.read_text(encoding="utf-8")
-        assert "Apache License" in license_content
+        assert "MIT License" in license_content
         assert "Irfan Kabir" in license_content
 
         notice_content = notice_path.read_text(encoding="utf-8")
@@ -266,12 +266,12 @@ def test_compliance_baseline_handler_idempotency():
         processor.ipo.input_data = []
 
         # First run
-        compliance_baseline_handler(processor, {})
+        _ = compliance_baseline_handler(processor, {})
         license_path = Path(temp_dir) / "LICENSE"
         original_content = license_path.read_text(encoding="utf-8")
 
         # Second run
-        compliance_baseline_handler(processor, {})
+        _ = compliance_baseline_handler(processor, {})
         new_content = license_path.read_text(encoding="utf-8")
 
         # Content should be identical (file not overwritten)
@@ -301,7 +301,7 @@ def test_handler_chaining():
     processor = HorizontalTextureProcessor(4, 4)
 
     # Initiate
-    initiate_handler(processor, {})
+    _ = initiate_handler(processor, {})
     assert len(processor.ipo.input_data) == 16
 
     # Set some values
@@ -309,7 +309,7 @@ def test_handler_chaining():
         processor.ipo.input_data[i] = GridCell(cell.x, cell.y, float(i) / 10.0, cell.texture_type)
 
     # Quantize
-    quantize_handler(processor, {})
+    _ = quantize_handler(processor, {})
     assert all(cell.value == round(cell.value * 10) / 10 for cell in processor.ipo.input_data)
 
     # Complete

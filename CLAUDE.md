@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**License:** MIT License - Simple, permissive, and adaptable for maximum integration smoothness.
+
 ## Read Order (Cross-Agent Baseline)
 1. `~/.claude/projects/-home-cable-series/memory/MEMORY.md` — operator-curated auto-memory (user-identity, apparat-conventions, SISA-trigger, etc.). Check for applicable context before replying.
 2. This file — ecosystem map, build order, data contracts.
@@ -29,6 +31,7 @@ the commands below reference the canonical archive, not the live tree.
 - No `--no-verify`, no `sudo` from agent, no history rewrite without operator consent.
 - Conventional commits with scope. Stage explicit paths only — never `git add -A` / `git add .`.
 - Identity via `~/.gitconfig` `includeIf` — `caraxesthebloodwyrm02` (primary/CascadeProjects), `irfankabir02` (secondary/grove). The npm scope is `@irfankabir002` (different from the GitHub identities; trailing `2` before the slash). Never set `user.name`/`user.email` ad hoc.
+- **License Compliance:** All changes must be compatible with MIT License. No GPL or restrictive dependencies.
 
 ## Interaction Style
 Default to conceptual/exploratory mode unless implementation is explicitly requested. Offer genuine, opinionated takes rather than backlogs of fixes or implementation plans.
@@ -40,6 +43,12 @@ For git commits: propose the commit plan and message first, then wait for explic
 
 ## Debugging
 Never assume or report a bug without verifying against actual file state; corrupted or interleaved tool output is not evidence of a bug.
+
+## License & Integration
+- **Primary License:** MIT License - chosen for simplicity, risk mitigation, adaptability, and overall functionality smoothness.
+- **Integration Philosophy:** Zero-abstraction, type-safe, and minimal dependency approach.
+- **Dependency Policy:** All dependencies must be MIT-compatible. No GPL, AGPL, or restrictive licenses.
+- **Compliance:** All code changes must maintain MIT license compatibility.
 
 ## Mangrove Ecosystem Overview
 A structured multi-project ecosystem organized by domain, serving as the home directory for Prince (Irfan Kabir). The live tree at `/home/cable/series/mangrove/` is a **stub**; the canonical archive lives on the 538 GB volume at `/home/irfankabir/` (volume UUID `cf656878-be07-4249-b8ba-10fd482aa610`), currently unmounted. Verify any path with `ls <path>` before relying on it.
@@ -90,7 +99,7 @@ bash scripts/audit_workspace.sh                                    # Verify that
 # Apparat warmup & verification
 uv run python -m mangrove.scripts.warmup_apparat                   # Primary smoke test for Apparat subsystem
 uv run python platform/apparat/sisa.py --list-phases               # 12 phases
-uv run python platform/apparat/sisa.py --phase compliance_baseline # materializes LICENSE/NOTICE/TERMS_OF_ENGAGEMENT.md
+uv run python platform/apparat/sisa.py --phase compliance_baseline # materializes MIT LICENSE/NOTICE/TERMS_OF_ENGAGEMENT.md
                                                                     #   (currently deferred — see .compliance-hand-off/README.md)
 ```
 
@@ -209,6 +218,7 @@ refactor(scope): ...
 Stage explicit paths only. Never `git add -A` or `git add .`. Identity comes from `~/.gitconfig` `includeIf` — never set `user.name`/`user.email` ad hoc.
 
 ## Governance & Safety
+- **License Policy:** MIT License governs all code. Simple, permissive, and risk-mitigated for smooth integration.
 - **Trust Contract (TUV-001):** Canonical rules live at `/home/irfankabir/docs/AGENTS.md` on the canonical archive (volume). The legacy reference `/mnt/arch_data/home/caraxes/seed/templates/development-contract.md` is on the unmounted Arch partition and may not resolve on this host.
 - **3PAA-SHADOW Containment:** Significant Challenge mandate active.
   - **Hard Deny:** `factory.ai`, `cursor.com`, `cursor.sh`, `workos.com`.
@@ -218,3 +228,4 @@ Stage explicit paths only. Never `git add -A` or `git add .`. Identity comes fro
   - **Override:** `GIT_ALLOW_SUSS=1 git commit/push` (sudo-equivalent; audit trail written).
 - **Privileges:** No `sudo`. Collect privileged steps for operator execution.
 - **`DO-NOT.html`** lives on the canonical archive at `domains/platform/finance/DO-NOT.html` (volume) — not in the live `finance/` stub. It encodes 9 payment hardlines that apply to every component in the finance package.
+- **License Compatibility:** All dependencies must be MIT-compatible. No GPL, AGPL, or copyleft restrictions.
