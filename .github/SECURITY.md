@@ -125,3 +125,7 @@ Security updates will be:
 - [GitHub Security Advisories](https://github.com/caraxesthebloodwyrm02/uni/security/advisories)
 - [Dependabot Alerts](https://github.com/caraxesthebloodwyrm02/uni/security/dependabot)
 - [CodeQL Analysis](https://github.com/caraxesthebloodwyrm02/uni/security/code-scanning)
+
+## License
+
+This project is licensed under the MIT License. See LICENSE file for details.
