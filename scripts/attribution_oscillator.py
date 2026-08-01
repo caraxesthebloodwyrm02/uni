@@ -11,7 +11,6 @@ import datetime
 import getpass
 import hashlib
 import math
-import os
 import platform
 import sys
 from pathlib import Path
@@ -44,7 +43,7 @@ def calculate_sine_squash(raw_signature: bytes) -> str:
     """
     if not raw_signature:
         return "0.0000"
-    
+
     # Map byte values to a sine wave phase (-pi to pi)
     # and sum their absolute amplitudes to squash peaks.
     total_amplitude = 0.0
@@ -52,7 +51,7 @@ def calculate_sine_squash(raw_signature: bytes) -> str:
         # map 0-255 to -pi to pi
         phase = (b / 255.0) * 2 * math.pi - math.pi
         total_amplitude += abs(math.sin(phase))
-        
+
     # Normalize by the number of bytes (max possible amplitude per byte is 1.0)
     normalized = total_amplitude / len(raw_signature)
     return f"{normalized:.4f}"
@@ -67,47 +66,49 @@ def main():
 
     # 1. Gather Variables
     # Runtime
-    runtime_ts = datetime.datetime.now(datetime.timezone.utc).isoformat()
-    
+    runtime_ts = datetime.datetime.now(datetime.UTC).isoformat()
+
     # Environment
     env_user = getpass.getuser()
     env_host = platform.node()
     env_py = sys.version.split(" ")[0]
     environment_cog = f"{env_user}@{env_host}|py-{env_py}"
-    
+
     # Binary (no exceptions)
     repo_root = Path(__file__).resolve().parent.parent
     binary_cogs = {}
     for b in CORE_BINARIES:
         binary_cogs[b] = sha256_file(repo_root / b)
-        
+
     binary_summary = "|".join([f"{k}:{v[:8]}" for k, v in binary_cogs.items()])
 
     # 2. Methodology A/B Transformation & Oscillator Pipeline
     # Hook the variables and run them through modulation locally.
     payload = f"{runtime_ts}::{environment_cog}::{binary_summary}::{args.prev_head}->{args.new_head}::{args.flag}"
-    
+
     # Checksum match (SHA256)
     digest = hashlib.sha256(payload.encode("utf-8"))
     checksum_hex = digest.hexdigest()
-    
+
     # Squash peaks & append balanced sine shapes
     sine_score = calculate_sine_squash(digest.digest())
-    
+
     # 3. Constraint Relevant Statement & Synthesis
     constraint_stmt = "INTELLIGENCE_AUTH_VERIFIED"
-    
+
     # 4. Finalization & Validation Output
     audit_log_path = repo_root / ".compliance-hand-off" / ".audit.log"
-    
+
     # Log behavior vs facts/reality
     log_entry = f"{runtime_ts}  checkout-attribution  {env_user}-oscillator  {constraint_stmt} | A/B-sine:{sine_score} | sum:{checksum_hex[:12]} | heads:{args.prev_head}->{args.new_head}\n"
-    
+
     if audit_log_path.exists():
         with open(audit_log_path, "a") as f:
             f.write(log_entry)
-            
-    print(f"Attribution Oscillator complete. Sine shape factor: {sine_score}. Checksum: {checksum_hex[:12]}")
+
+    print(
+        f"Attribution Oscillator complete. Sine shape factor: {sine_score}. Checksum: {checksum_hex[:12]}"
+    )
     return 0
 
 

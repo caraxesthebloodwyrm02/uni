@@ -55,19 +55,19 @@ def test_dependency_tracking():
 
     # Save metrics (append to history)
     metrics_file = Path(__file__).parent.parent / ".dependency-metrics.json"
-    
+
     history = []
     if metrics_file.exists():
         try:
-            with open(metrics_file, "r") as f:
+            with open(metrics_file) as f:
                 history = json.load(f)
                 if not isinstance(history, list):
                     history = [history]  # migrate old single-object format
         except json.JSONDecodeError:
             pass  # start fresh if corrupted
-            
+
     history.append(metrics)
-    
+
     with open(metrics_file, "w") as f:
         json.dump(history, f, indent=2)
 
