@@ -5,6 +5,10 @@ on:
     - cron: '0 3 * * 1' # weekly on Monday 03:00 UTC
   workflow_dispatch: {}
 
+permissions:
+  contents: read
+  actions: read
+
 jobs:
   branch-audit:
     runs-on: ubuntu-latest
