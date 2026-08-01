@@ -155,10 +155,11 @@ fi
 echo ""
 echo "Checking documentation organization..."
 if [ -d "docs" ]; then
-    if [ -f "docs/SECURITY.md" ] && [ -f "docs/SECURITY_GUIDE.md" ]; then
-        report_success "Security documentation organized in docs/"
+    report_success "docs/ directory exists"
+    if [ -f ".github/SECURITY.md" ]; then
+        report_success "Security documentation present in .github/"
     else
-        report_warning "Security documentation not found in docs/"
+        report_warning "Security documentation not found in .github/"
     fi
 else
     report_error "docs/ directory not found"
