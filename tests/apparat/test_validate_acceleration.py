@@ -1,3 +1,4 @@
+# mypy: disable-error-code=import-untyped,import-not-found,name-defined
 """Tests for src/golding/validate.py.
 
 Each exit-code class is exercised by deliberately misconfiguring the
@@ -24,13 +25,17 @@ the test file can sit in the tree alongside its (not-yet-merged)
 implementation without breaking CI.
 """
 
-import importlib.util
 import json
 import os
 import subprocess
 import sys
+from collections.abc import Callable
+from typing import Any
 
 import pytest
+
+import mangrove_platform.apparat.src.golding.code.validate as _code_validate
+import mangrove_platform.apparat.src.golding.validate as validate  # noqa: E402
 
 # Add the golding module to the path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../mangrove_platform/apparat/src"))
@@ -39,16 +44,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../mangrove_platf
 # importable. This is the bridge between tracked-scope tests and
 # structural-excess source: the test can be reviewed and merged
 # before the implementation lands, without breaking the build.
-_validate_spec = importlib.util.find_spec("golding.validate")
-if _validate_spec is None:
-    pytest.skip(
-        reason="golding.validate is not importable; mangrove_platform/apparat/src/golding/validate.py "
-        "has not been bootstrapped.",
-        allow_module_level=True,
-    )
+_validate_spec = pytest.importorskip("golding.validate", reason="golding.validate is not importable; mangrove_platform/apparat/src/golding/validate.py has not been bootstrapped.")  # type: ignore[arg-type]
 
-import golding.code.validate as _code_validate  # type: ignore # noqa: E402  (must follow the skip guard)
-from golding import validate  # type: ignore # noqa: E402  (must follow the skip guard)
+
 
 # ---------------------------------------------------------------------------
 # Exit-code table
@@ -72,14 +70,14 @@ EXPECTED_EXIT_CODES = {
 # ---------------------------------------------------------------------------
 
 
-def _patched_check(name, passed, detail=None):
+def _patched_check(name: str, passed: bool, detail: dict[str, Any] | None = None) -> Callable[[], Any]:
     """Build a fake check function whose CheckResult has the requested
     shape. Used with monkeypatch.setattr to replace validate.CHECKS.
     """
     if detail is None:
         detail = {}
 
-    def fake_check():
+    def fake_check() -> validate.CheckResult:
         return validate.CheckResult(name=name, passed=passed, detail=detail)
 
     return fake_check
@@ -90,7 +88,7 @@ def _patched_check(name, passed, detail=None):
 # ---------------------------------------------------------------------------
 
 
-def test_clean_config_returns_zero(monkeypatch):
+def test_clean_config_returns_zero(monkeypatch: pytest.MonkeyPatch) -> None:
     """With every check replaced by a passing stub, main() returns 0
     and emits one JSON line per check to stdout.
     """
@@ -108,7 +106,7 @@ def test_clean_config_returns_zero(monkeypatch):
     assert validate.main() == 0
 
 
-def test_clean_config_emits_json_lines(monkeypatch, capsys):
+def test_clean_config_emits_json_lines(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     """Each check emits a single JSON line, regardless of pass/fail.
     The format must be stable because CI greps the log.
     """
@@ -126,7 +124,7 @@ def test_clean_config_emits_json_lines(monkeypatch, capsys):
     lines = [line for line in captured.out.split("\n") if line]
     assert len(lines) == 3, f"expected 3 JSON lines, got {len(lines)}: {lines!r}"
     for line in lines:
-        payload = json.loads(line)  # raises if not valid JSON
+        payload: dict[str, Any] = json.loads(line)  # raises if not valid JSON
         assert payload["passed"] is True
         assert "detail" in payload
 
@@ -136,7 +134,7 @@ def test_clean_config_emits_json_lines(monkeypatch, capsys):
 # ---------------------------------------------------------------------------
 
 
-def test_baseline_violation_returns_two(monkeypatch):
+def test_baseline_violation_returns_two(monkeypatch: pytest.MonkeyPatch) -> None:
     """A failing baseline check returns exit code 2."""
     monkeypatch.setattr(
         _code_validate,
@@ -146,7 +144,7 @@ def test_baseline_violation_returns_two(monkeypatch):
     assert validate.main() == 2
 
 
-def test_cruise_engagement_failure_returns_three(monkeypatch):
+def test_cruise_engagement_failure_returns_three(monkeypatch: pytest.MonkeyPatch) -> None:
     """A failing cruise check returns exit code 3."""
     monkeypatch.setattr(
         _code_validate,
@@ -156,7 +154,7 @@ def test_cruise_engagement_failure_returns_three(monkeypatch):
     assert validate.main() == 3
 
 
-def test_slice_contract_violation_returns_four(monkeypatch):
+def test_slice_contract_violation_returns_four(monkeypatch: pytest.MonkeyPatch) -> None:
     """A failing slice-contract check returns exit code 4."""
     monkeypatch.setattr(
         _code_validate,
@@ -166,7 +164,7 @@ def test_slice_contract_violation_returns_four(monkeypatch):
     assert validate.main() == 4
 
 
-def test_unhandled_exception_returns_one(monkeypatch):
+def test_unhandled_exception_returns_one(monkeypatch: pytest.MonkeyPatch) -> None:
     """A check that raises an unhandled exception yields exit code 1.
     This is the only exit code that is *not* specific to a check
     class — it means the validator itself is broken.
@@ -179,7 +177,7 @@ def test_unhandled_exception_returns_one(monkeypatch):
     assert validate.main() == 1
 
 
-def test_unhandled_exception_emits_error_payload(monkeypatch, capsys):
+def test_unhandled_exception_emits_error_payload(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
     """When a check raises, the JSON line on stdout carries the error
     string so CI logs can show the cause without re-running.
     """
@@ -192,7 +190,7 @@ def test_unhandled_exception_emits_error_payload(monkeypatch, capsys):
     captured = capsys.readouterr()
     lines = [line for line in captured.out.split("\n") if line]
     assert len(lines) == 1
-    payload = json.loads(lines[0])
+    payload: dict[str, Any] = json.loads(lines[0])
     assert "error" in payload
     assert "simulated failure" in payload["error"]
 
@@ -202,15 +200,15 @@ def test_unhandled_exception_emits_error_payload(monkeypatch, capsys):
 # ---------------------------------------------------------------------------
 
 
-def test_first_failing_check_short_circuits(monkeypatch):
+def test_first_failing_check_short_circuits(monkeypatch: pytest.MonkeyPatch) -> None:
     """If the first check fails, the second is never invoked. The
     third never sees a chance to run either. This is the
     implementation behavior in main()'s for-loop.
     """
     calls = []
 
-    def track(name):
-        def _check():
+    def track(name: str) -> Callable[[], Any]:
+        def _check() -> Any:
             calls.append(name)
             return validate.CheckResult(name=name, passed=False, detail={})
 
@@ -226,7 +224,7 @@ def test_first_failing_check_short_circuits(monkeypatch):
     assert calls == ["baseline_normalization"]
 
 
-def test_check_order_matches_documented_order():
+def test_check_order_matches_documented_order() -> None:
     """The order in CHECKS must be baseline → cruise → contract. CI
     output and §4.2 of RECOMMENDATION.md both rely on this order.
     A reordering that breaks this contract is a regression.
@@ -249,7 +247,7 @@ def test_check_order_matches_documented_order():
 # ---------------------------------------------------------------------------
 
 
-def test_exit_code_table_matches_implementation():
+def test_exit_code_table_matches_implementation() -> None:
     """The exit-code table in validate.main() must cover every check
     name. If a new check is added without a code, main() raises
     KeyError on the first failure — which would otherwise bubble up
@@ -273,7 +271,7 @@ def test_exit_code_table_matches_implementation():
             _code_validate.CHECKS = original
 
 
-def test_every_check_name_has_an_exit_code():
+def test_every_check_name_has_an_exit_code() -> None:
     """The names emitted by CHECKS must all be present in the exit
     code table. A new check added without a code is a bug.
 
@@ -283,7 +281,7 @@ def test_every_check_name_has_an_exit_code():
     name would be a tautology, since validate.main() looks up the
     code by the *emitted* name, not the function name.
     """
-    emitted = set()
+    emitted: set[str] = set()
     for check in _code_validate.CHECKS:
         result = check()  # may raise; we want to know if it does
         emitted.add(result.name)
@@ -297,7 +295,7 @@ def test_every_check_name_has_an_exit_code():
 # ---------------------------------------------------------------------------
 
 
-def test_check_result_dataclass_shape():
+def test_check_result_dataclass_shape() -> None:
     """CheckResult is a dataclass with name, passed, detail. The CI
     JSON-line format relies on asdict() working cleanly.
     """
@@ -306,7 +304,7 @@ def test_check_result_dataclass_shape():
         passed=True,
         detail={"count": 9, "min": 0.0, "max": 100.0, "mean": 50.0, "violations": []},
     )
-    as_dict = {
+    as_dict: dict[str, Any] = {
         "name": result.name,
         "passed": result.passed,
         "detail": result.detail,
@@ -321,7 +319,7 @@ def test_check_result_dataclass_shape():
 # ---------------------------------------------------------------------------
 
 
-def test_subprocess_zero_on_clean_config():
+def test_subprocess_zero_on_clean_config() -> None:
     """Run the validator as a subprocess against the actual runtime.
     This is the only test in this file that exercises the real check
     functions rather than monkeypatched stubs. It corresponds to the
@@ -344,3 +342,4 @@ def test_subprocess_zero_on_clean_config():
     assert result.returncode == 0, (
         f"validator exited {result.returncode}\nstdout: {result.stdout}\nstderr: {result.stderr}"
     )
+

@@ -67,8 +67,8 @@ class HorizontalTextureProcessor:
         self.patterns = ["acoustic", "natural", "synthetic", "organic"]
         self.generator = RepetitionCombinationGenerator(self.patterns)
         self.ipo = InputProcessOutput()
-        self.midi_events: list[dict] = []
-        self.led_states: list[dict] = []
+        self.midi_events: list[dict[str, Any]] = []
+        self.led_states: list[dict[str, Any]] = []
         self.ascii_art: list[str] = []
         self.turn_counter: int = 0
         self._drive_last_result: str | None = None
@@ -198,16 +198,21 @@ class HorizontalTextureProcessor:
     # TODO: Experimental feature - requires external components.drive_loop and components.drive_widget
     # Mark as experimental until dependencies are integrated or feature is removed
     def start_drive_gym(
-        self, iterations=20, cadence_frames=5, distance_km=0.1, theme_kwargs=None
-    ) -> dict:
+        self, iterations: int = 20, cadence_frames: int = 5, distance_km: float = 0.1, theme_kwargs: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         import threading
 
-        if getattr(self, "_drive_thread", None) and self._drive_thread.is_alive():
+        thread = getattr(self, "_drive_thread", None)
+        if thread and thread.is_alive():
             return {"status": "running", "run_id": getattr(self, "_drive_run_id", None)}
         theme_kwargs = theme_kwargs or {}
+        run_controller_loop = None
+        DriveThemeConfig = None
         try:
-            from components.drive_loop import run_controller_loop
-            from components.drive_widget import DriveThemeConfig
+            from components.drive_loop import run_controller_loop  # type: ignore[import]
+            from components.drive_widget import DriveThemeConfig  # type: ignore[import]
+        except ImportError:
+            return {"status": "error", "error": "Required components (drive_loop, drive_widget) not available"}
         except Exception as e:
             return {"status": "error", "error": str(e)}
         run_id = uuid.uuid4().hex if "uuid" in globals() else "manual-id"
@@ -254,7 +259,7 @@ class HorizontalTextureProcessor:
         t.start()
         return {"status": "started", "run_id": run_id, "out_path": str(out_path)}
 
-    def drive_status(self) -> dict:
+    def drive_status(self) -> dict[str, Any]:
         thread = getattr(self, "_drive_thread", None)
         return {
             "run_id": getattr(self, "_drive_run_id", None),

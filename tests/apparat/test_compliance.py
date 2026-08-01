@@ -8,8 +8,8 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../platform"))
 
-from apparat.horizontal_texture_processor import HorizontalTextureProcessor
-from apparat.phase_handlers import compliance_baseline_handler
+from mangrove_platform.apparat.horizontal_texture_processor import HorizontalTextureProcessor
+from mangrove_platform.apparat.phase_handlers import compliance_baseline_handler
 
 
 def test_compliance_artifact_generation():
@@ -19,7 +19,7 @@ def test_compliance_artifact_generation():
         processor.ipo.compliance_root = temp_dir
         processor.ipo.input_data = []
 
-        compliance_baseline_handler(processor, {})
+        _ = compliance_baseline_handler(processor, {})
 
         # Verify all three files were created
         license_path = Path(temp_dir) / "LICENSE"
@@ -34,23 +34,23 @@ def test_compliance_artifact_generation():
 
 
 def test_license_file_content():
-    """Test that LICENSE file contains required Apache 2.0 elements."""
+    """Test that LICENSE file contains required MIT elements."""
     with tempfile.TemporaryDirectory() as temp_dir:
         processor = HorizontalTextureProcessor(4, 4)
         processor.ipo.compliance_root = temp_dir
         processor.ipo.input_data = []
 
-        compliance_baseline_handler(processor, {})
+        _ = compliance_baseline_handler(processor, {})
 
         license_path = Path(temp_dir) / "LICENSE"
         license_content = license_path.read_text(encoding="utf-8")
 
-        # Check for required Apache 2.0 elements
-        assert "Apache License" in license_content
-        assert "Version 2.0" in license_content
-        assert "http://www.apache.org/licenses/" in license_content
+        # Check for required MIT elements
+        assert "MIT License" in license_content
+        assert "Copyright (c) 2024-2026 Irfan Kabir" in license_content
+        assert "Permission is hereby granted" in license_content
         assert "Irfan Kabir" in license_content
-        assert "Licensed under the Apache License" in license_content
+        assert "Licensed under the MIT License" in license_content or "MIT License" in license_content
 
         print("PASS: test_license_file_content")
 
@@ -62,7 +62,7 @@ def test_notice_file_content():
         processor.ipo.compliance_root = temp_dir
         processor.ipo.input_data = []
 
-        compliance_baseline_handler(processor, {})
+        _ = compliance_baseline_handler(processor, {})
 
         notice_path = Path(temp_dir) / "NOTICE"
         notice_content = notice_path.read_text(encoding="utf-8")
@@ -71,7 +71,7 @@ def test_notice_file_content():
         assert "Mangrove — Compliance Notice" in notice_content
         assert "Irfan Kabir" in notice_content
         assert "Mangrove ecosystem contributors" in notice_content
-        assert "Apache License" in notice_content
+        assert "MIT License" in notice_content
 
         print("PASS: test_notice_file_content")
 
@@ -83,7 +83,7 @@ def test_terms_of_engagement_structure():
         processor.ipo.compliance_root = temp_dir
         processor.ipo.input_data = []
 
-        compliance_baseline_handler(processor, {})
+        _ = compliance_baseline_handler(processor, {})
 
         terms_path = Path(temp_dir) / "TERMS_OF_ENGAGEMENT.md"
         terms_content = terms_path.read_text(encoding="utf-8")
@@ -105,7 +105,7 @@ def test_compliance_artifact_recording():
         processor.ipo.compliance_root = temp_dir
         processor.ipo.input_data = []
 
-        compliance_baseline_handler(processor, {})
+        _ = compliance_baseline_handler(processor, {})
 
         # Check that artifacts were recorded
         assert processor.ipo.compliance_artifacts is not None
@@ -132,13 +132,13 @@ def test_compliance_idempotency():
         processor.ipo.input_data = []
 
         # First run
-        compliance_baseline_handler(processor, {})
+        _ = compliance_baseline_handler(processor, {})
         license_path = Path(temp_dir) / "LICENSE"
         original_content = license_path.read_text(encoding="utf-8")
         original_mtime = license_path.stat().st_mtime
 
         # Second run
-        compliance_baseline_handler(processor, {})
+        _ = compliance_baseline_handler(processor, {})
         new_content = license_path.read_text(encoding="utf-8")
         new_mtime = license_path.stat().st_mtime
 
@@ -160,7 +160,7 @@ def test_compliance_with_custom_root():
         processor.ipo.compliance_root = str(custom_root)
         processor.ipo.input_data = []
 
-        compliance_baseline_handler(processor, {})
+        _ = compliance_baseline_handler(processor, {})
 
         # Files should be in custom directory
         assert (custom_root / "LICENSE").exists()
@@ -177,7 +177,7 @@ def test_compliance_preserves_input_data():
         processor.ipo.compliance_root = temp_dir
 
         # Set some input data
-        from apparat.api import GridCell
+        from mangrove_platform.apparat.api import GridCell
 
         processor.ipo.input_data = [
             GridCell(0, 0, 1.0, "test"),
@@ -202,11 +202,12 @@ def test_compliance_digest_format():
         processor.ipo.compliance_root = temp_dir
         processor.ipo.input_data = []
 
-        compliance_baseline_handler(processor, {})
+        _ = compliance_baseline_handler(processor, {})
 
         # Check digest format
+        assert processor.ipo.compliance_artifacts is not None
         for artifact in processor.ipo.compliance_artifacts:
-            path, digest, size = artifact
+            _, digest, _ = artifact
             assert digest.startswith("sha256:")
             # Should be 16 hex characters after "sha256:"
             assert len(digest) == len("sha256:") + 16
@@ -224,7 +225,7 @@ def test_compliance_file_sizes():
         processor.ipo.compliance_root = temp_dir
         processor.ipo.input_data = []
 
-        compliance_baseline_handler(processor, {})
+        _ = compliance_baseline_handler(processor, {})
 
         # Check file sizes
         license_path = Path(temp_dir) / "LICENSE"

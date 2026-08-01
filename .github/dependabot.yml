@@ -9,8 +9,6 @@ updates:
     open-pull-requests-limit: 10
     assignees:
       - "irfankabir02"
-    reviewers:
-      - "caraxesthebloodwyrm02"
     labels:
       - "dependencies"
       - "python"
@@ -28,7 +26,7 @@ updates:
         patterns:
           - "*"
         update-types:
-          - "version-update:semver-patch"
-          - "version-update:semver-minor"
+          - "patch"
+          - "minor"
         exclude-patterns:
           - "mcp"
