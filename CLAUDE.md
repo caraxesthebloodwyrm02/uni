@@ -85,8 +85,7 @@ uv run ruff check .                                                # E/F/W/I/UP/
 uv run ruff format .
 
 # Workspace maintenance
-bash scripts/audit_workspace.sh                                    # WARNING: exits 2 if any stub dir is empty
-                                                                    #   (the live tree has 8 empty dirs — it always exits 2 today)
+bash scripts/audit_workspace.sh                                    # Verify that all directories are properly populated or have a .gitkeep
 
 # Apparat warmup & verification
 uv run python -m mangrove.scripts.warmup_apparat                   # Primary smoke test for Apparat subsystem
@@ -95,7 +94,7 @@ uv run python platform/apparat/sisa.py --phase compliance_baseline # materialize
                                                                     #   (currently deferred — see .compliance-hand-off/README.md)
 ```
 
-Note: `uv run python -m build` is currently broken because `pyproject.toml` declares `packages = ["src/mangrove"]` but no `src/mangrove/` package exists in the live tree.
+Note: `uv run python -m build` builds the `platform` package, as declared in `pyproject.toml`.
 
 ### Workspace Maintenance (canonical archive only)
 ```bash

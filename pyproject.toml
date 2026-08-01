@@ -25,8 +25,8 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "pytest>=8.3.0,<9",
     "pytest-cov>=7.1.0,<8",
+    "pytest>=8.3.0,<9",
     "ruff>=0.4.0,<1",
 ]
 
@@ -55,5 +55,5 @@ line-length = 100
 target-version = "py313"
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "UP", "B"]
+select = ["B", "E", "F", "I", "UP", "W"]
 ignore = ["E501"]
