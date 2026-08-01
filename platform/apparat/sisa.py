@@ -241,7 +241,9 @@ def _identify_warnings(root: Path, failed: list[str], missing_prereq: list[str])
     if stray.exists() and stray.stat().st_size == 0:
         warnings.append(f"Empty stray file present: {stray}")
     # Bidirectional Registry/Enum Synchronization Check
-    processor = sys.modules.get("mangrove.platform.apparat.horizontal_texture_processor")
+    processor = sys.modules.get("apparat.horizontal_texture_processor") or sys.modules.get(
+        "mangrove.platform.apparat.horizontal_texture_processor"
+    )
     if processor is not None and hasattr(processor, "Phase"):
         enum_values = {p.value for p in processor.Phase}
     else:

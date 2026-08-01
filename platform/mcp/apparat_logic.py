@@ -27,7 +27,7 @@ def initialize_apparat():
     Populates the registry with both built-in and specialized phase handlers.
     """
     # 1. Register specialized handlers from phase_handlers.py
-    from mangrove.platform.apparat.phase_handlers import (
+    from apparat.phase_handlers import (
         combine_handler,
         complete_handler,
         compliance_baseline_handler,

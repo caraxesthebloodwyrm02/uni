@@ -9,9 +9,9 @@ if str(root) not in sys.path:
 # Bootstrap registry: phase_handlers.py defines handlers (initiate, quantize,
 # combine, render, complete) but does not register them at import time. Mirror
 # what sisa._auto_register_handlers does — register them here explicitly.
-from mangrove.platform.apparat import phase_handlers as _phase_handlers  # noqa: E401, E402
-from mangrove.platform.apparat.apparat import register_phase_handler  # noqa: E402
-from mangrove.platform.apparat.horizontal_texture_processor import (  # noqa: E402
+from apparat import phase_handlers as _phase_handlers  # noqa: E401, E402
+from apparat.apparat import register_phase_handler  # noqa: E402
+from apparat.horizontal_texture_processor import (  # noqa: E402
     HorizontalTextureProcessor,
 )
 
