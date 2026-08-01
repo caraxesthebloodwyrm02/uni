@@ -24,7 +24,7 @@ NC='\033[0m'
 echo "Checking for potential secrets..."
 
 # Check staged files
-suspicious_files=$(git diff --cached --name-only --diff-filter=ACM | while read file; do
+suspicious_files=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null | while read file; do
     if [ -f "$file" ]; then
         for pattern in "${SECRET_PATTERNS[@]}"; do
             if grep -qiE "$pattern" "$file" 2>/dev/null; then
