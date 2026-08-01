@@ -1,0 +1,23 @@
+name: 'Audit stale branches (draft)'
+
+on:
+  schedule:
+    - cron: '0 3 * * 1' # weekly on Monday 03:00 UTC
+  workflow_dispatch: {}
+
+jobs:
+  branch-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run prune-stale-branches audit
+        run: |
+          chmod +x scripts/prune-stale-branches.sh
+          ./scripts/prune-stale-branches.sh
+      - name: Upload audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: branch-audit
+          path: .compliance-hand-off/branch-audit.csv
