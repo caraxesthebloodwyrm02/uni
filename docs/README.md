@@ -1,6 +1,5 @@
-# Mangrove — Documentation Root
-
-This directory is the documentation root for the **Mangrove ecosystem**.
+# Mangrove Codebase (Botanical Garden)
+This directory is digital botanical garden environment where species co-exist within a cyclical ecosystem resembling practical systema and logic with code
 
 It is intentionally minimal: the authoritative guidance for agents working on the
 Mangrove live tree lives in [`../CLAUDE.md`](../CLAUDE.md). This README is a
