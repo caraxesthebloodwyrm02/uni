@@ -1,0 +1,44 @@
+# Code Owners for Mangrove Repository
+# This file defines who must approve changes to specific paths
+
+# Global fallback - all maintainers must approve if no other rule matches
+* @caraxesthebloodwyrm02 @irfankabir02
+
+# Core infrastructure - requires both maintainers
+.github/ @caraxesthebloodwyrm02 @irfankabir02
+CLAUDE.md @caraxesthebloodwyrm02 @irfankabir02
+pyproject.toml @caraxesthebloodwyrm02 @irfankabir02
+uv.lock @caraxesthebloodwyrm02 @irfankabir02
+
+# Security and compliance - both maintainers
+.github/SECURITY.md @caraxesthebloodwyrm02 @irfankabir02
+.github/CODEOWNERS @caraxesthebloodwyrm02 @irfankabir02
+.github/dependabot.yml @caraxesthebloodwyrm02 @irfankabir02
+.gitignore @caraxesthebloodwyrm02 @irfankabir02
+
+# CI/CD workflows - both maintainers
+.github/workflows/ @caraxesthebloodwyrm02 @irfankabir02
+
+# Apparat core subsystem - both maintainers
+mangrove_platform/apparat/ @caraxesthebloodwyrm02 @irfankabir02
+
+# MCP infrastructure - both maintainers
+mangrove_platform/mcp/ @caraxesthebloodwyrm02 @irfankabir02
+
+# Build and configuration - both maintainers
+scripts/ @caraxesthebloodwyrm02 @irfankabir02
+
+# Tests - single maintainer approval sufficient
+tests/ @caraxesthebloodwyrm02 @irfankabir02
+
+# Documentation - single maintainer approval sufficient
+docs/ @caraxesthebloodwyrm02 @irfankabir02
+
+# Compliance hand-off - both maintainers
+.compliance-hand-off/ @caraxesthebloodwyrm02 @irfankabir02
+
+# Configuration files - both maintainers
+*.toml @caraxesthebloodwyrm02 @irfankabir02
+*.yaml @caraxesthebloodwyrm02 @irfankabir02
+*.yml @caraxesthebloodwyrm02 @irfankabir02
+*.json @caraxesthebloodwyrm02 @irfankabir02

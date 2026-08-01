@@ -8,14 +8,14 @@ version = "0.2.0"
 description = "Multi-area Python workspace for the Mangrove ecosystem"
 readme = "CLAUDE.md"
 requires-python = ">=3.13,<3.14"
-license = { text = "Apache-2.0" }
+license = { text = "MIT" }
 authors = [
     { name = "Irfan Kabir" },
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
+    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.13",
 ]
@@ -56,6 +56,18 @@ line-length = 100
 target-version = "py313"
 
 [tool.ruff.lint]
-select = ["B", "E", "F", "I", "UP", "W"]
+select = ["B", "E", "F", "I", "S", "UP", "W"]
 ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101", "S110"]  # Allow assert and try-except-pass in tests
+"mangrove_platform/mcp/test_server.py" = ["S101"]  # Allow assert in test scripts
+"scripts/**/*.py" = ["S603", "S607"]  # Allow subprocess calls in scripts
+"mangrove_platform/apparat/review_pack.py" = ["S603"]  # Subprocess for review pack generation
+"mangrove_platform/apparat/horizontal_texture_processor.py" = ["S110"]  # Legitimate exception handling
+"mangrove_platform/mcp/constraints_engine.py" = ["S110"]  # Legitimate exception handling
+"tests/test_dependency_hygiene.py" = ["S603", "S607"]  # Test file with subprocess calls
+
+[tool.ruff.lint.flake8-bandit]
+check-typed-exception = true
 

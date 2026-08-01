@@ -3,12 +3,14 @@ updates:
   - package-ecosystem: "uv"
     directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "weekly"
       day: "monday"
       time: "09:00"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 10
     assignees:
       - "irfankabir02"
+    reviewers:
+      - "caraxesthebloodwyrm02"
     labels:
       - "dependencies"
       - "python"
@@ -18,3 +20,15 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
+    pull-request-branch-name:
+      separator: "-"
+    # Enable grouping for minor/patch updates
+    groups:
+      security-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "version-update:semver-patch"
+          - "version-update:semver-minor"
+        exclude-patterns:
+          - "mcp"
