@@ -21,12 +21,9 @@ def test_dependency_tracking():
     # Try to get dependency count using uv
     try:
         result = subprocess.run(
-            ["uv", "pip", "list"],
-            capture_output=True,
-            text=True,
-            cwd=Path(__file__).parent.parent
+            ["uv", "pip", "list"], capture_output=True, text=True, cwd=Path(__file__).parent.parent
         )
-        dep_lines = [line for line in result.stdout.split('\n') if line.strip()]
+        dep_lines = [line for line in result.stdout.split("\n") if line.strip()]
         metrics["dependency_count"] = len(dep_lines)
         metrics["uv_available"] = True
         print(f"Dependencies found: {len(dep_lines)}")
