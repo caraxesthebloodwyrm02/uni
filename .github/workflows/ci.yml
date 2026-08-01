@@ -37,7 +37,6 @@ jobs:
 
       - name: Check for forbidden domains
         run: |
-          # Exclude phase_handlers.py which contains governance documentation (legitimate references)
           if find . -type f \( -name "*.py" -o -name "*.toml" -o -name "*.yaml" -o -name "*.yml" -o -name "*.json" \) ! -path "*/.git/*" ! -path "*/.venv/*" ! -path "*/htmlcov/*" ! -path "*/.pytest_cache/*" ! -path "*/.github/*" ! -path "*/mangrove_platform/apparat/phase_handlers.py" -exec grep -l -E "factory\.ai|cursor\.com|cursor\.sh|workos\.com" {} \; 2>/dev/null; then
             echo "Forbidden domains detected in code files (3PAA-SHADOW containment)"
             exit 1
@@ -45,7 +44,6 @@ jobs:
 
       - name: Check for forbidden tokens
         run: |
-          # Exclude phase_handlers.py which contains governance documentation (legitimate references)
           if find . -type f \( -name "*.py" -o -name "*.toml" -o -name "*.yaml" -o -name "*.yml" -o -name "*.json" \) ! -path "*/.git/*" ! -path "*/.venv/*" ! -path "*/htmlcov/*" ! -path "*/.pytest_cache/*" ! -path "*/.github/*" ! -path "*/mangrove_platform/apparat/phase_handlers.py" -exec grep -l -E "WorkOS|Factory" {} \; 2>/dev/null; then
             echo "Forbidden tokens detected in code files (3PAA-SHADOW containment)"
             exit 1
