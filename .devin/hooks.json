@@ -1,0 +1,34 @@
+{
+  "description": "Dev workspace hooks and automation configuration",
+  "preCommitChecks": [
+    "check-forbidden-patterns",
+    "ruff-lint",
+    "ruff-format",
+    "check-secrets",
+    "check-large-files"
+  ],
+  "prePushChecks": [
+    "run-tests",
+    "workspace-audit"
+  ],
+  "automation": {
+    "ciIntegration": true,
+    "requireTests": true,
+    "requireLint": true,
+    "securityChecks": true
+  },
+  "environment": {
+    "pythonVersion": "3.13",
+    "packageManager": "uv",
+    "virtualEnvironment": ".venv",
+    "maxFileSizeKB": 500,
+    "forbiddenDomains": ["factory.ai", "cursor.com", "cursor.sh", "workos.com"],
+    "forbiddenTokens": ["WorkOS", "Factory"]
+  },
+  "workspaceValidation": {
+    "requireEmptyDirsToHaveGitkeep": true,
+    "requireAllStubDirsToHaveGitkeep": true,
+    "allowDocumentationOutsideDocs": false,
+    "maxTranscriptFiles": 0
+  }
+}

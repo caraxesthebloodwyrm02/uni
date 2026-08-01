@@ -43,3 +43,9 @@ docs/ @caraxesthebloodwyrm02 @irfankabir02
 *.yaml @caraxesthebloodwyrm02 @irfankabir02
 *.yml @caraxesthebloodwyrm02 @irfankabir02
 *.json @caraxesthebloodwyrm02 @irfankabir02
+
+# Hooks and automation - both maintainers
+.pre-commit-config.yaml @caraxesthebloodwyrm02 @irfankabir02
+.devin/ @caraxesthebloodwyrm02 @irfankabir02
+scripts/validate-workspace.sh @caraxesthebloodwyrm02 @irfankabir02
+scripts/check-*.sh @caraxesthebloodwyrm02 @irfankabir02
