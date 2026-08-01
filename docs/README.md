@@ -1,5 +1,4 @@
-# Mangrove — Documentation Root
-
+# Mangrove Codebase (Botanical Garden)
 This directory is the documentation root for the **Mangrove ecosystem**.
 
 It is intentionally minimal: the authoritative guidance for agents working on the
