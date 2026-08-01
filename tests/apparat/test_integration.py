@@ -4,7 +4,7 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../platform"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../mangrove_platform"))
 
 from apparat.api import GridCell, Phase
 from apparat.apparat import (

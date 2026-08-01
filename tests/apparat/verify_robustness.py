@@ -3,7 +3,7 @@ from pathlib import Path
 
 # Ensure mangrove root is in sys.path
 mangrove_dir = Path(__file__).resolve().parent.parent.parent
-platform_dir = mangrove_dir / "platform"
+platform_dir = mangrove_dir / "mangrove_platform"
 for d in (str(platform_dir), str(mangrove_dir)):
     if d not in sys.path:
         sys.path.insert(0, d)

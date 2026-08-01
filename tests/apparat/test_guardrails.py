@@ -1,12 +1,10 @@
-import os
-
 from apparat.guardrails import audit_global_assistance_baseline
 
 
-def test_global_assistance_verified():
+def test_global_assistance_verified(monkeypatch):
     """Verify that a compliant payload passes global integrity check."""
-    os.environ["MANGROVE_BRIBERY_THRESHOLD"] = "0.99"
-    os.environ["MANGROVE_RECURSIVE_TRIM_DEPTH"] = "5"
+    monkeypatch.setenv("MANGROVE_BRIBERY_THRESHOLD", "0.99")
+    monkeypatch.setenv("MANGROVE_RECURSIVE_TRIM_DEPTH", "5")
 
     result = audit_global_assistance_baseline("standard_user_voice_payload", 1)
     assert result["safe"] is True
@@ -22,18 +20,18 @@ def test_weak_subject_enrichment_protection():
     assert "Sensory enrichment applied" in result["reason"]
 
 
-def test_global_assistance_recursive_boundary():
+def test_global_assistance_recursive_boundary(monkeypatch):
     """Verify that excessive recursive depth triggers baseline boundary protection."""
-    os.environ["MANGROVE_RECURSIVE_TRIM_DEPTH"] = "3"
+    monkeypatch.setenv("MANGROVE_RECURSIVE_TRIM_DEPTH", "3")
 
     result = audit_global_assistance_baseline("deep_recursive_payload", 4)
     assert result["safe"] is False
     assert result["status"] == "RECURSIVE_BOUNDARY_EXCEEDED"
 
 
-def test_global_assistance_tier_distortion():
+def test_global_assistance_tier_distortion(monkeypatch):
     """Verify that noise distortions exceeding baseline threshold trigger global protection."""
-    os.environ["MANGROVE_BRIBERY_THRESHOLD"] = "0.01"
+    monkeypatch.setenv("MANGROVE_BRIBERY_THRESHOLD", "0.01")
 
     result = audit_global_assistance_baseline("distorted_noise_payload", 1)
     assert result["safe"] is False

@@ -45,8 +45,8 @@ def recursive_guardrail_check(depth: int, target_scope: str) -> list:
 
             # Simulated check logic derived from this session's history
             if scope == "Namespace Poisoning":
-                # Check if platform.mcp imports are properly namespaced
-                server_file = repo_root / "platform/mcp/apparat_server.py"
+                # Check if mangrove_platform.mcp imports are properly namespaced
+                server_file = repo_root / "mangrove_platform/mcp/apparat_server.py"
                 if server_file.exists():
                     text = server_file.read_text()
                     if "from mcp import" in text:

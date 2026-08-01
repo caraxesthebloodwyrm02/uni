@@ -15,8 +15,8 @@ from pathlib import Path
 # Resolve the apparat source root
 MANGROVE_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(MANGROVE_ROOT.parent))
-sys.path.insert(0, str(MANGROVE_ROOT / "platform" / "apparat" / "src"))
-APPARAT_ROOT = MANGROVE_ROOT / "platform" / "apparat"
+sys.path.insert(0, str(MANGROVE_ROOT / "mangrove_platform" / "apparat" / "src"))
+APPARAT_ROOT = MANGROVE_ROOT / "mangrove_platform" / "apparat"
 
 # Files to trace
 TARGET_FILES = [

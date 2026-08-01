@@ -31,15 +31,15 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["platform"]
+packages = ["mangrove_platform"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = [".", "platform"]
+pythonpath = ["mangrove_platform"]
 addopts = ["--strict-markers", "-p", "no:anyio"]
 
 [tool.coverage.run]
-source = ["platform"]
+source = ["mangrove_platform"]
 omit = [
     "tests/*",
     "*/__pycache__/*",

@@ -28,6 +28,9 @@ jobs:
       - name: Lint check
         run: uv run ruff check --fix
 
+      - name: Verify lint applied no changes
+        run: git diff --exit-code
+
   test:
     runs-on: ubuntu-latest
     needs: quality

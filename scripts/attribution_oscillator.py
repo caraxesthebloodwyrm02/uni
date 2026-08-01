@@ -11,7 +11,7 @@ import datetime
 import getpass
 import hashlib
 import math
-import platform
+import socket
 import sys
 from pathlib import Path
 
@@ -19,7 +19,7 @@ from pathlib import Path
 CORE_BINARIES = [
     "uv.lock",
     "pyproject.toml",
-    "platform/apparat/sisa.py",
+    "mangrove_platform/apparat/sisa.py",
 ]
 
 
@@ -70,7 +70,7 @@ def main():
 
     # Environment
     env_user = getpass.getuser()
-    env_host = platform.node()
+    env_host = socket.gethostname()
     env_py = sys.version.split(" ")[0]
     environment_cog = f"{env_user}@{env_host}|py-{env_py}"
 

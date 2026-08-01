@@ -11,7 +11,7 @@ from pathlib import Path
 # Ensure we can import from the mangrove root
 current_dir = Path(__file__).resolve().parent
 mangrove_dir = current_dir.parent
-platform_dir = mangrove_dir / "platform"
+platform_dir = mangrove_dir / "mangrove_platform"
 mcp_dir = platform_dir / "mcp"
 
 for d in (str(mcp_dir), str(platform_dir), str(mangrove_dir)):

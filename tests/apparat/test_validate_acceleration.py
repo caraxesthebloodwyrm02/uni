@@ -33,7 +33,7 @@ import sys
 import pytest
 
 # Add the golding module to the path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../platform/apparat/src"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../mangrove_platform/apparat/src"))
 
 # Skip the entire module if the companion implementation is not
 # importable. This is the bridge between tracked-scope tests and
@@ -42,7 +42,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../platform/appar
 _validate_spec = importlib.util.find_spec("golding.validate")
 if _validate_spec is None:
     pytest.skip(
-        reason="golding.validate is not importable; platform/apparat/src/golding/validate.py "
+        reason="golding.validate is not importable; mangrove_platform/apparat/src/golding/validate.py "
         "has not been bootstrapped.",
         allow_module_level=True,
     )
@@ -333,7 +333,7 @@ def test_subprocess_zero_on_clean_config():
     """
     env = os.environ.copy()
     env["PYTHONPATH"] = (
-        f"{os.path.abspath('platform/apparat/src')}{os.pathsep}{env.get('PYTHONPATH', '')}"
+        f"{os.path.abspath('mangrove_platform/apparat/src')}{os.pathsep}{env.get('PYTHONPATH', '')}"
     )
     result = subprocess.run(
         [sys.executable, "-m", "golding.validate"],
