@@ -50,7 +50,7 @@ jobs:
           uv pip install -e .
 
       - name: Run tests
-        run: uv run pytest
+        run: PYTHONPATH=. uv run pytest
 
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
