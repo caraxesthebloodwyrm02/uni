@@ -20,7 +20,7 @@ The operator's standing directive is to surface gaps and produce an actionable
 strategy. The compliance baseline is **present as a plan**, not as artefacts,
 because the operator chose to defer materialisation. The reasons offered:
 
-- The live tree is documented as a stub. Materialising MIT LICENSE in a stub
+- The live tree is documented as a stub. Materialising Apache-2.0 LICENSE in a stub
   is technically legal but creates an attestation that the canonical archive
   may not yet reflect.
 - The canonical archive at `/home/irfankabir/` (volume UUID `cf656878-…`) is
@@ -86,8 +86,8 @@ rsync -av --update \
 ```
 chore(license): add LICENSE, NOTICE, TERMS_OF_ENGAGEMENT.md via apparat compliance_baseline
 
-- Materialise MIT LICENSE file at repo root matching pyproject.toml:11.
-- Update all compliance references to MIT License.
+- Materialise Apache-2.0 LICENSE file at repo root matching pyproject.toml:11.
+- Update all compliance references to Apache-2.0 License.
 - Materialise TERMS_OF_ENGAGEMENT.md consolidating in-force memory entries.
 - Handler: platform/apparat/phase_handlers.py::compliance_baseline_handler.
 - Phase registration: platform/apparat/sisa.py::PHASE_DEFINITIONS.
@@ -101,7 +101,7 @@ Stage explicit paths only — never `git add -A` / `git add .`.
 | # | Decision | Source | Notes |
 |---|---|---|---|
 | 1 | Stage live tree? | Operator: "Skip — defer" | No files written this run |
-| 2 | PEP form change? | Operator: "check" | Verified PEP 639 (current = `{ text = "MIT" }`) and PEP 735 (`[dependency-groups]` already correct); no Edit applied |
+| 2 | PEP form change? | Operator: "check" | Verified PEP 639 (current = `{ text = "Apache-2.0" }`) and PEP 735 (`[dependency-groups]` already correct); no Edit applied |
 | 3 | Canonical hand-off? | Operator: "accumulated" | Interpreted as accumulated-delta rsync with audit log; rsync skeleton above |
 | 4 | Stale CLAUDE.md refs? | Auto-deferred | `~/.claude/AGREEMENT.md` and `finance/DO-NOT.html` are dead-on-arrival; addressing them is bigger than the compliance-baseline scope. Defer to canonical-port |
 | 5 | Build backend | Verified live | `[build-system]` is `hatchling` (PEP 639-capable) — no blocker for future SPDX-form migration |

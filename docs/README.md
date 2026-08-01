@@ -83,11 +83,11 @@ and **Governance & Safety**:
 
 ## License
 
-The full MIT license text is materialised at the live tree root by the
+The full Apache-2.0 license text is materialised at the live tree root by the
 Apparat `compliance_baseline` phase
 (`platform/apparat/phase_handlers.py::compliance_baseline_handler`). The
 phase is registered and ready but is operator-deferred for direct invocation —
 run `uv run python platform/apparat/sisa.py --phase compliance_baseline`
 after explicit operator approval. A stub reference is in
-`../pyproject.toml::license` as `{ text = "MIT" }` (PEP 639
+`../pyproject.toml::license` as `{ text = "Apache-2.0" }` (PEP 639
 mixed-object form).
