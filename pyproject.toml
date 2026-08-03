@@ -6,7 +6,6 @@ build-backend = "hatchling.build"
 name = "mangrove"
 version = "0.2.0"
 description = "Multi-area Python workspace for the Mangrove ecosystem"
-readme = "CLAUDE.md"
 requires-python = ">=3.13,<3.14"
 license = { text = "MIT" }
 authors = [
@@ -20,7 +19,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
-    "mcp>=2.0.0",
+    "mcp>=2.0.0,<3",
 ]
 
 [dependency-groups]
@@ -59,22 +58,13 @@ target-version = "py313"
 select = ["B", "E", "F", "I", "S", "UP", "W"]
 ignore = ["E501"]
 
-[tool.mypy]
-ignore_missing_imports = true
-warn_return_any = false
-warn_unused_ignores = false
-exclude = "tests/apparat/test_validate_acceleration.py"
-
-[[tool.mypy.overrides]]
-module = "golding.*"
-ignore_missing_imports = true
-
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["S101", "S110"]  # Allow assert and try-except-pass in tests
 "mangrove_platform/mcp/test_server.py" = ["S101"]  # Allow assert in test scripts
 "scripts/**/*.py" = ["S603", "S607"]  # Allow subprocess calls in scripts
 "mangrove_platform/apparat/review_pack.py" = ["S603"]  # Subprocess for review pack generation
 "mangrove_platform/apparat/horizontal_texture_processor.py" = ["S110"]  # Legitimate exception handling
+"mangrove_platform/apparat/sisa.py" = ["S110"]  # Bootstrap must catch all import errors silently
 "mangrove_platform/mcp/constraints_engine.py" = ["S110"]  # Legitimate exception handling
 "tests/test_dependency_hygiene.py" = ["S603", "S607"]  # Test file with subprocess calls
 
