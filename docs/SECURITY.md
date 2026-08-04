@@ -30,5 +30,6 @@ The live attack surface is the MCP server (`mangrove_platform/mcp/`). It uses:
 - Structured audit logging of tool invocations
 
 Governance constraints (3PAA-SHADOW containment, forbidden tokens/domains,
-SUSS path denial) are enforced by `scripts/check-forbidden-patterns.sh`,
-`scripts/check-secrets.sh`, and `scripts/check-large-files.sh`.
+SUSS path denial) are enforced by `uv run python scripts/validate_workspace.py`.
+Individual check scripts (`scripts/check_forbidden_patterns.py`, `scripts/check_secrets.py`,
+and `scripts/check_large_files.py`) are WIP — use the consolidated script instead.

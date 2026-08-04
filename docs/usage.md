@@ -37,11 +37,11 @@ unset VIRTUAL_ENV && uv run ruff format .
 ## Workspace Maintenance
 
 ```bash
-bash scripts/audit_workspace.sh          # counts empty dirs / confirms .gitkeep coverage
-bash scripts/validate-workspace.sh       # structure + forbidden-patterns + secrets (shared validate-lib.sh)
-bash scripts/check-forbidden-patterns.sh # 3PAA-SHADOW / SUSS / WorkOS / Factory sweep
-bash scripts/check-secrets.sh            # secret-pattern scan
-bash scripts/check-large-files.sh        # 60 MB corpus-index.tsv guardrail
+uv run python scripts/audit_workspace.py  (WIP: stub not yet implemented)  # counts empty dirs / confirms .gitkeep coverage
+uv run python scripts/validate_workspace.py  # structure + forbidden-patterns + secrets
+uv run python scripts/check_forbidden_patterns.py  (WIP: stub not yet implemented)  # 3PAA-SHADOW / SUSS / WorkOS / Factory sweep
+uv run python scripts/check_secrets.py  (WIP: stub not yet implemented)  # secret-pattern scan
+uv run python scripts/check_large_files.py  (WIP: stub not yet implemented)  # 60 MB corpus-index.tsv guardrail
 ```
 
 ## MCP Server
