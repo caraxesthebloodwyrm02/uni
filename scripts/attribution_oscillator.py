@@ -47,6 +47,7 @@ def main():
     parser = argparse.ArgumentParser(description="Attribution Chain")
     parser.add_argument("--prev-head", default="HEAD@{1}", help="Previous commit hash")
     parser.add_argument("--new-head", default="HEAD", help="New commit hash")
+    parser.add_argument("--flag", default="1", help="Checkout flag (1 for branch, 0 for file)")
     args = parser.parse_args()
 
     # Runtime
