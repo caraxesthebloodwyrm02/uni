@@ -105,3 +105,51 @@ class TestEcosystemMap:
     )
     def test_room_listed(self, claude_md_text: str, room: str) -> None:
         assert room in claude_md_text, f"missing ecosystem room: {room!r}"
+
+
+class TestDocumentationCorruption:
+    """Regression test: no broken u\nv or u\n+v patterns in documentation."""
+
+    @pytest.mark.parametrize(
+        "doc_path",
+        [
+            REPO_ROOT / "AGENTS.md",
+            REPO_ROOT / "CLAUDE.md",
+            REPO_ROOT / "docs" / "usage.md",
+            REPO_ROOT / "docs" / "SECURITY.md",
+            REPO_ROOT / "docs" / "SECURITY_GUIDE.md",
+            REPO_ROOT / ".devin" / "README.md",
+        ],
+    )
+    def test_no_broken_uv_lines(self, doc_path: Path) -> None:
+        """Ensure uv run commands are not split across lines (e.g., u\nv run ...)."""
+        if not doc_path.exists():
+            pytest.skip(f"{doc_path} does not exist")
+
+        text = doc_path.read_text(encoding="utf-8")
+
+        broken_patterns = [
+            (r"^u\nv run", "broken uv line (u\\nv run)"),
+            (r"^u\s+\nv run", "broken uv line with spaces (u \\nv run)"),
+            (r"\bu\n\+v run", "broken diff line (u\\n+v run)"),
+        ]
+
+        for pattern, desc in broken_patterns:
+            assert not re.search(
+                pattern, text, re.MULTILINE
+            ), f"{doc_path.name}: Found {desc}"
+
+    def test_validate_workspace_py_referenced(self) -> None:
+        """Main validation script should be uv run python scripts/validate_workspace.py."""
+        doc_files = [
+            REPO_ROOT / "AGENTS.md",
+            REPO_ROOT / "CLAUDE.md",
+            REPO_ROOT / "docs" / "usage.md",
+        ]
+
+        for doc_path in doc_files:
+            if doc_path.exists():
+                text = doc_path.read_text(encoding="utf-8")
+                assert (
+                    "uv run python scripts/validate_workspace.py" in text
+                ), f"{doc_path.name}: should reference uv run python scripts/validate_workspace.py"

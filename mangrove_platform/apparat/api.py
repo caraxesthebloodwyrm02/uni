@@ -7,8 +7,13 @@ from typing import Any, Protocol, runtime_checkable
 # --- Base Types ---
 
 
-class ApparatValidationError(Exception):
-    """Exception raised when phase parameter validation fails."""
+class ApparatValidationError(ValueError):
+    """Exception raised when phase parameter validation fails.
+
+    Subclasses ``ValueError`` so Pydantic field validators (MCP gate) convert
+    it into a structured ``ValidationError`` while the Apparat dispatcher can
+    still catch it by its domain type.
+    """
 
     pass
 

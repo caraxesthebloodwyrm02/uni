@@ -116,11 +116,11 @@ uv run ruff check .                                                # E/F/W/I/UP/
 uv run ruff format .
 
 # Workspace maintenance
-bash scripts/audit_workspace.sh                       # counts empty dirs / confirms .gitkeep coverage
-bash scripts/validate-workspace.sh                    # shared validation hook (validate-lib.sh sourced)
-bash scripts/check-forbidden-patterns.sh              # 3PAA-SHADOW / SUSS / WorkOS / Factory sweep
-bash scripts/check-secrets.sh                         # secret-pattern scan
-bash scripts/check-large-files.sh                     # 60 MB corpus-index.tsv guardrail
+uv run python scripts/audit_workspace.py  (WIP: stub not yet implemented)  # counts empty dirs / confirms .gitkeep coverage
+uv run python scripts/validate_workspace.py  # structure + forbidden-patterns + secrets
+uv run python scripts/check_forbidden_patterns.py  (WIP: stub not yet implemented)  # 3PAA-SHADOW / SUSS / WorkOS / Factory sweep
+uv run python scripts/check_secrets.py  (WIP: stub not yet implemented)  # secret-pattern scan
+uv run python scripts/check_large_files.py  (WIP: stub not yet implemented)  # 60 MB corpus-index.tsv guardrail
 
 # Audit trail
 head scripts/CODE_REVIEW.md                           # canonical review log (F-codes; F2/F3/F4 resolved)

@@ -63,12 +63,12 @@ This directory contains configuration for workspace automation, hooks, and valid
 ### Local Development
 ```bash
 # Run workspace validation
-bash scripts/validate-workspace.sh
+uv run python scripts/validate_workspace.py
 
 # Run individual checks
-bash scripts/check-forbidden-patterns.sh
-bash scripts/check-secrets.sh
-bash scripts/check-large-files.sh
+uv run python scripts/check_forbidden_patterns.py  (WIP: stub not yet implemented)
+uv run python scripts/check_secrets.py  (WIP: stub not yet implemented)
+uv run python scripts/check_large_files.py  (WIP: stub not yet implemented)
 ```
 
 ### Pre-Commit (if installed)

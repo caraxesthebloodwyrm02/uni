@@ -17,30 +17,15 @@ from time import monotonic
 
 from pydantic import BaseModel, Field, field_validator
 
-logger = logging.getLogger("mangrove.mcp.security")
-
-# Canonical phase names (whitelist).  Phase invocations may carry a positional
-# argument suffix, e.g. "scale:2.0" or "clamp:0.1,0.9", so the whitelist
-# applies to the base name before the first ':'.
-ALLOWED_PHASES = frozenset(
-    {
-        "initiate",
-        "quantize",
-        "combine",
-        "render",
-        "complete",
-        "normalize",
-        "scale",
-        "clamp",
-        "filter",
-        "invert",
-        "highlight",
-        "compliance_baseline",
-        "validate_acceleration",
-    }
+from mangrove_platform.apparat.phase_validation import (
+    ALLOWED_PHASES,  # noqa: F401  re-exported for backward-compat (docs/usage.md)
+    PHASE_ARG_PATTERN,
+    PIPELINE_PATTERN,
+    parse_phase_syntax,
+    validate_pipeline,
 )
 
-PHASE_ARG_PATTERN = r"^[a-zA-Z0-9_:,.\-+]+$"
+logger = logging.getLogger("mangrove.mcp.security")
 
 
 @dataclass(frozen=True)
@@ -90,9 +75,7 @@ class PhaseRequest(GridRequest):
     @field_validator("phase")
     @classmethod
     def validate_phase_name(cls, v: str) -> str:
-        base = v.split(":")[0]
-        if base not in ALLOWED_PHASES:
-            raise ValueError(f"Unknown phase: {base!r}")
+        parse_phase_syntax(v)
         return v
 
 
@@ -101,19 +84,14 @@ class PipelineRequest(GridRequest):
 
     pipeline: str = Field(
         ...,
-        pattern=r"^[a-zA-Z0-9_:,.\-+]+(?:/[a-zA-Z0-9_:,.\-+]+)*$",
+        pattern=PIPELINE_PATTERN,
         description="Slash-separated phase sequence.",
     )
 
     @field_validator("pipeline")
     @classmethod
     def validate_pipeline(cls, v: str) -> str:
-        for step in v.split("/"):
-            if not step:
-                raise ValueError("Pipeline contains an empty phase step")
-            base = step.split(":")[0]
-            if base not in ALLOWED_PHASES:
-                raise ValueError(f"Unknown phase: {base!r}")
+        validate_pipeline(v)
         return v
 
 

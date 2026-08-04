@@ -5,7 +5,7 @@ Acoustic/Natural | No Binded Programmable Comparison Schema
 
 import itertools
 import json
-import re
+import logging
 import threading
 import uuid
 from pathlib import Path
@@ -20,6 +20,9 @@ from .api import (
     PhaseParams,
 )
 from .apparat import get_phase_handler, get_phase_param_map, get_phase_signature
+from .phase_validation import split_phase_key
+
+logger = logging.getLogger("mangrove.apparat.processor")
 
 
 class RepetitionCombinationGenerator:
@@ -167,7 +170,9 @@ class HorizontalTextureProcessor:
                     result = hook(self, name, result) if result is not None else hook(self, name)
                 except Exception as e:
                     # Post-hooks are generally non-critical; we log and continue
-                    print(f"{hook_type.capitalize()}-hook warning for phase {name}: {e}")
+                    logger.warning(
+                        "%s-hook warning for phase %s: %s", hook_type.capitalize(), name, e
+                    )
             return result
 
     def process_phase(self, phase: Phase | str) -> list[GridCell]:
@@ -203,14 +208,13 @@ class HorizontalTextureProcessor:
             self._processing_depth -= 1
 
     def _parse_phase_syntax(self, phase_key: str) -> tuple[str, str | None]:
-        """Parse phase key into name and parameters string."""
-        match = re.match(r"^([a-zA-Z0-9_]+)(?::(.*))?$", phase_key)
-        if not match:
-            raise ApparatValidationError(
-                f"Invalid phase syntax: '{phase_key}'. Expected format 'phase_name:arg1,arg2'"
-            )
-        groups = match.groups()
-        return (groups[0], groups[1] if len(groups) > 1 else None)
+        """Parse phase key into name and parameters string.
+
+        Syntax-only (no whitelist): delegates to the shared
+        ``phase_validation.split_phase_key`` so registry-extended handlers
+        remain dispatchable while the pattern stays a single source of truth.
+        """
+        return split_phase_key(phase_key)
 
     def _get_handler(self, name: str):
         """Get phase handler from registry or raise validation error."""
