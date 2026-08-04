@@ -32,7 +32,7 @@ EXCLUDE_DIRS = {
 }
 # Additional file to ignore per original bash lib
 EXCLUDE_FILES = {"mangrove_platform/apparat/phase_handlers.py", "scripts/validate_workspace.py"}
-PATTERN_CHECK_SKIP_PREFIXES = ("tests/",)
+PATTERN_CHECK_ALLOWLIST = {"tests/test_regex_validation.py", "tests/test_terminal_safety.py"}
 
 
 def report_error(msg: str):
@@ -122,7 +122,7 @@ def check_files(root: Path) -> tuple[int, int]:
             large_files.append((rel_path, size_kb))
 
         # Pattern checks
-        if rel_path.startswith(PATTERN_CHECK_SKIP_PREFIXES):
+        if rel_path in PATTERN_CHECK_ALLOWLIST:
             continue
         if filepath.suffix in (".py", ".toml", ".yaml", ".yml", ".json"):
             try:
