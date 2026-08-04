@@ -15,7 +15,10 @@ try:
     from mangrove_platform.mcp.apparat_logic import initialize_apparat
 except ImportError as e:
     print(f"CRITICAL: Failed to import Apparat components: {e}", file=sys.stderr)
-    print("Please run this script using 'uv run' to ensure all dependencies are available.", file=sys.stderr)
+    print(
+        "Please run this script using 'uv run' to ensure all dependencies are available.",
+        file=sys.stderr,
+    )
     sys.exit(1)
 
 

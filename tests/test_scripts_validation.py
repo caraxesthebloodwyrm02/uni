@@ -10,7 +10,10 @@ from scripts.config_loader import get_setting
 def test_config_loader():
     """Verify that get_setting retrieves values and returns defaults correctly."""
     assert get_setting(["environment", "staleBranchAgeDays"], 90) == 90
-    assert get_setting(["environment", "complianceDirectory"], ".compliance-hand-off") == ".compliance-hand-off"
+    assert (
+        get_setting(["environment", "complianceDirectory"], ".compliance-hand-off")
+        == ".compliance-hand-off"
+    )
     assert get_setting(["nonexistent", "key"], "default_value") == "default_value"
 
 
@@ -30,13 +33,11 @@ def test_python_script_execution():
     """Verify that running python scripts with --help exits cleanly with code 0."""
     repo_root = Path(__file__).resolve().parent.parent
 
-
-
     # Test attribution_oscillator.py --help
     res = subprocess.run(  # noqa: S603
         [sys.executable, str(repo_root / "scripts" / "attribution_oscillator.py"), "--help"],
         capture_output=True,
-        text=True
+        text=True,
     )
     assert res.returncode == 0
     assert "Attribution Chain" in res.stdout
@@ -50,7 +51,7 @@ def test_shell_script_execution():
     res = subprocess.run(  # noqa: S603, S607
         ["/bin/bash", str(repo_root / "scripts" / "audit_workspace.sh"), "/nonexistent/path/123"],
         capture_output=True,
-        text=True
+        text=True,
     )
     assert res.returncode == 1
     assert "ERROR: root does not exist" in res.stderr

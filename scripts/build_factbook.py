@@ -39,7 +39,11 @@ archive_env = os.environ.get("MANGROVE_ARCHIVE_ROOT")
 if archive_env:
     ARCHIVE = Path(archive_env)
 elif "scriptConfig" in CONFIG and "buildFactbook" in CONFIG["scriptConfig"]:
-    ARCHIVE = Path(CONFIG["scriptConfig"]["buildFactbook"].get("archivePath", "/run/media/cable/cf656878-be07-4249-b8ba-10fd482aa610/home/irfankabir"))
+    ARCHIVE = Path(
+        CONFIG["scriptConfig"]["buildFactbook"].get(
+            "archivePath", "/run/media/cable/cf656878-be07-4249-b8ba-10fd482aa610/home/irfankabir"
+        )
+    )
 else:
     ARCHIVE = Path("/run/media/cable/cf656878-be07-4249-b8ba-10fd482aa610/home/irfankabir")
 
@@ -175,9 +179,7 @@ def main() -> None:
     # --- Fact 6: lab package count (CORRECTION: 28 dirs, 15 pyproject.toml) ---
     lab_root = ARCHIVE / "domains/platform/operations/lab"
     if lab_root.is_dir():
-        n_dirs = sum(
-            1 for _ in lab_root.iterdir() if _.is_dir() and not _.name.startswith(".")
-        )
+        n_dirs = sum(1 for _ in lab_root.iterdir() if _.is_dir() and not _.name.startswith("."))
         pp_count = int(
             run_command(
                 [
@@ -188,7 +190,7 @@ def main() -> None:
                     "-name",
                     "pyproject.toml",
                 ],
-                check=False
+                check=False,
             )
             .stdout.strip()
             .count("\n")

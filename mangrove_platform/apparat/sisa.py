@@ -544,6 +544,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.debug:
         try:
             from mangrove_platform.apparat.debug import enable as enable_debug
+
             enable_debug()
         except ImportError:
             pass

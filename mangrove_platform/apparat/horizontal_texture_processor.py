@@ -136,7 +136,7 @@ class HorizontalTextureProcessor:
         """
         hook_map = {
             "pre": (self.pre_hooks, self.global_pre_hooks),
-            "post": (self.post_hooks, self.global_post_hooks)
+            "post": (self.post_hooks, self.global_post_hooks),
         }
         specific_hooks, global_hooks = hook_map[hook_type]
         if phase:
@@ -154,7 +154,9 @@ class HorizontalTextureProcessor:
                 try:
                     result = hook(self, name, result) if result is not None else hook(self, name)
                 except Exception as e:
-                    raise ApparatValidationError(f"{hook_type.capitalize()}-hook error for phase {name}: {e}") from e
+                    raise ApparatValidationError(
+                        f"{hook_type.capitalize()}-hook error for phase {name}: {e}"
+                    ) from e
             return result
         else:  # post-hooks
             hooks = self.post_hooks.get(name, []) + self.global_post_hooks
@@ -259,9 +261,7 @@ class HorizontalTextureProcessor:
 
         return result
 
-    def _post_scale(
-        self, processor: Any, name: str, result: list[GridCell]
-    ) -> list[GridCell]:
+    def _post_scale(self, processor: Any, name: str, result: list[GridCell]) -> list[GridCell]:
         """Post-hook for SCALE: run the implicit highlight pass, then write processed_data."""
         processor.current_phase = Phase.SCALE
         highlight_handler = get_phase_handler("highlight")
@@ -273,17 +273,13 @@ class HorizontalTextureProcessor:
         processor.ipo.processed_data = result
         return result
 
-    def _post_render(
-        self, processor: Any, name: str, result: list[GridCell]
-    ) -> list[GridCell]:
+    def _post_render(self, processor: Any, name: str, result: list[GridCell]) -> list[GridCell]:
         """Post-hook for RENDER: only RENDER writes output_data."""
         processor.current_phase = Phase.RENDER
         processor.ipo.output_data = result
         return result
 
-    def _post_complete(
-        self, processor: Any, name: str, result: list[GridCell]
-    ) -> list[GridCell]:
+    def _post_complete(self, processor: Any, name: str, result: list[GridCell]) -> list[GridCell]:
         """Post-hook for COMPLETE: write processed_data."""
         processor.current_phase = Phase.COMPLETE
         processor.ipo.processed_data = result

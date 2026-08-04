@@ -10,7 +10,9 @@ import sys
 from pathlib import Path
 
 
-def run_command(cmd: list[str], cwd: Path | None = None, check: bool = True) -> subprocess.CompletedProcess:
+def run_command(
+    cmd: list[str], cwd: Path | None = None, check: bool = True
+) -> subprocess.CompletedProcess:
     """
     Agent-safe subprocess wrapper with clear error messages.
 
@@ -26,13 +28,7 @@ def run_command(cmd: list[str], cwd: Path | None = None, check: bool = True) -> 
         SystemExit: On command failure (with clear error message)
     """
     try:
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            check=check,
-            cwd=cwd
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True, check=check, cwd=cwd)
         return result
     except subprocess.CalledProcessError as e:
         print(f"ERROR: Command failed: {' '.join(cmd)}")
@@ -59,11 +55,7 @@ def check_command_exists(cmd: str) -> bool:
         True if command exists, False otherwise
     """
     try:
-        subprocess.run(
-            ["which", cmd],
-            capture_output=True,
-            check=True
-        )
+        subprocess.run(["which", cmd], capture_output=True, check=True)
         return True
     except (subprocess.CalledProcessError, FileNotFoundError):
         return False
