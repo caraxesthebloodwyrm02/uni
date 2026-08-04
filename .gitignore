@@ -53,3 +53,8 @@ sixtasks.txt
 *.tmp
 *.temp
 *.bak
+
+# Dead stub + stray artifacts (see code review 2026-08-04)
+platform/
+combined_diff.txt
+=*

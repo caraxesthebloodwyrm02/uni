@@ -17,4 +17,4 @@
 
 ## 3. Function & Routing Contract
 - **CDP Endpoint Format**: `ws://localhost:9222/devtools/browser/<id>`
-- **Routing Destination**: Embedded MCP tools (`platform/mcp/apparat_server.py`) route tool requests to internal phase handlers without triggering external HTTP/SSL network dependencies.
+- **Routing Destination**: Embedded MCP tools (`mangrove_platform/mcp/apparat_server.py`) route tool requests to internal phase handlers without triggering external HTTP/SSL network dependencies.

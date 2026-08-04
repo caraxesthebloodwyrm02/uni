@@ -1,42 +1,47 @@
 import sys
-from pathlib import Path
 
-# Ensure mangrove root is in sys.path
-mangrove_dir = Path(__file__).resolve().parent.parent.parent
-platform_dir = mangrove_dir / "mangrove_platform"
-for d in (str(platform_dir), str(mangrove_dir)):
-    if d not in sys.path:
-        sys.path.insert(0, d)
-
-from apparat.api import ApparatValidationError  # noqa: E402
-from apparat.apparat import register_phase_handler  # noqa: E402
-from apparat.horizontal_texture_processor import (  # noqa: E402
+from mangrove_platform.apparat.api import ApparatValidationError
+from mangrove_platform.apparat.apparat import register_phase_handler
+from mangrove_platform.apparat.horizontal_texture_processor import (
     HorizontalTextureProcessor,
 )
 
 
+def _require_positive_resolution(w: int, h: int) -> tuple[int, int]:
+    """Entry-point guard: positive int resolution only.
+
+    Mirrors verify_diagnostics._require_positive_resolution so both entry
+    surfaces reject non-integer or non-positive resolution at the boundary.
+    """
+    if not isinstance(w, int) or not isinstance(h, int):
+        raise TypeError(f"resolution must be int, got w={type(w).__name__}, h={type(h).__name__}")
+    if w <= 0 or h <= 0:
+        raise ValueError(f"resolution must be positive, got w={w}, h={h}")
+    return w, h
+
+
 def probe(processor, phase, expected_error=None):
-    print(f"🔍 Probing {phase}...", end=" ")
+    print(f"[PROBE] Probing {phase}...", end=" ")
     try:
         processor.process_phase(phase)
         if expected_error:
-            print(f"❌ FAILED: Expected {expected_error} but got success")
+            print(f"[FAIL] Expected {expected_error} but got success")
             return False
-        print("✅ SUCCESS")
+        print("[OK] SUCCESS")
         return True
     except ApparatValidationError as e:
         if expected_error and expected_error in str(e):
-            print(f"✅ CAUGHT: {str(e)}")
+            print(f"[OK] CAUGHT: {str(e)}")
             return True
-        print(f"❌ UNEXPECTED ERROR: {str(e)}")
+        print(f"[FAIL] UNEXPECTED ERROR: {str(e)}")
         return False
     except Exception as e:
-        print(f"💥 CRASH: {type(e).__name__}: {e}")
+        print(f"[CRASH] {type(e).__name__}: {e}")
         return False
 
 
 def test_robustness():
-    print("🚀 Starting Apparat Robustness Verification...")
+    print("Starting Apparat Robustness Verification...")
     processor = HorizontalTextureProcessor(10, 10)
     passed = 0
     total = 0
@@ -117,10 +122,12 @@ def test_robustness():
         if probe(processor, p, e):
             passed += 1
 
-    print(f"\n✨ Robustness Results: {passed}/{total} passed.")
+    print(f"\n[OK] Robustness Results: {passed}/{total} passed.")
     return passed == total
 
 
 if __name__ == "__main__":
     if not test_robustness():
+        print("[FAIL] Robustness probes did not all pass.", file=sys.stderr)
         sys.exit(1)
+    print("[OK] Robustness exited clean.")

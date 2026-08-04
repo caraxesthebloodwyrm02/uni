@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
-# check-secrets.sh - Check for potential secrets in code files
-# Prevents accidental commits of credentials, API keys, or sensitive data
+# ==============================================================================
+# Script Name: check-secrets.sh
+# Description: Check staged files for potential credentials, API keys, and secrets
+# Scope/Safety: Safe / Read-only pre-commit validation
+# Dependencies: git, grep
+# ==============================================================================
 
 set -euo pipefail
 
@@ -10,17 +14,8 @@ set -euo pipefail
 # Initialize configuration
 init_validation ".devin/hooks.json"
 
-# Common secret patterns
-SECRET_PATTERNS=(
-    "password\s*=\s*['\"]"         # password = "..." or password = '...'
-    "api[_-]?key\s*=\s*['\"]"      # api_key = "..." or api_key = '...'
-    "secret\s*=\s*['\"]"          # secret = "..." or secret = '...'
-    "token\s*=\s*['\"]"           # token = "..." or token = '...'
-    "credential\s*=\s*['\"]"      # credential = "..." or credential = '...'
-    "aws[_-]?access[_-]?key\s*="   # AWS access key
-    "private[_-]?key\s*="          # Private key
-    "bearer\s+[A-Za-z0-9_\-\.]+"  # Bearer token
-)
+# Check dependencies for agent-safe execution
+check_dependencies git grep
 
 echo "Checking for potential secrets..."
 
@@ -33,12 +28,9 @@ fi
 
 suspicious_files=$(echo "$staged_files" | while read file; do
     if [ -f "$file" ]; then
-        for pattern in "${SECRET_PATTERNS[@]}"; do
-            if grep -qiE "$pattern" "$file" 2>/dev/null; then
-                echo "$file (matches pattern: $pattern)"
-                break
-            fi
-        done
+        if grep -qiE "$SECRET_PATTERNS_REGEX" "$file" 2>/dev/null; then
+            echo "$file"
+        fi
     fi
 done)
 

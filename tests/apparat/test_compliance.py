@@ -50,7 +50,9 @@ def test_license_file_content():
         assert "Copyright (c) 2024-2026 Irfan Kabir" in license_content
         assert "Permission is hereby granted" in license_content
         assert "Irfan Kabir" in license_content
-        assert "Licensed under the MIT License" in license_content or "MIT License" in license_content
+        assert (
+            "Licensed under the MIT License" in license_content or "MIT License" in license_content
+        )
 
         print("PASS: test_license_file_content")
 
@@ -251,4 +253,4 @@ if __name__ == "__main__":
     test_compliance_preserves_input_data()
     test_compliance_digest_format()
     test_compliance_file_sizes()
-    print("\n✨ All compliance tests passed!")
+    print("\n[OK] All compliance tests passed!")

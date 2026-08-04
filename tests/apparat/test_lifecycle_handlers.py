@@ -1,12 +1,11 @@
-import os
-import sys
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../mangrove_platform"))
+#!/usr/bin/env python3
+"""Apparat Lifecycle handler tests."""
 
 import pytest
-from apparat.api import GridCell
-from apparat.horizontal_texture_processor import HorizontalTextureProcessor
-from apparat.phase_handlers import (
+
+from mangrove_platform.apparat.api import GridCell
+from mangrove_platform.apparat.horizontal_texture_processor import HorizontalTextureProcessor
+from mangrove_platform.apparat.phase_handlers import (
     combine_handler,
     complete_handler,
     compliance_baseline_handler,
@@ -24,7 +23,7 @@ class DummyGenerator:
 @pytest.fixture
 def processor():
     proc = HorizontalTextureProcessor(2, 2)
-    proc.generator = DummyGenerator()
+    proc.generator = DummyGenerator()  # type: ignore[invalid-assignment]
     return proc
 
 

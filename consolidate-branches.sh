@@ -1,9 +1,20 @@
-#!/bin/bash
-# Branch Consolidation Execution Script
-# License: MIT
-# Scope: Delete 3 merged branches (remote + local)
+#!/usr/bin/env bash
+# ==============================================================================
+# Script Name: consolidate-branches.sh
+# Description: Delete merged remote and local tracking branches
+# Scope/Safety: Medium risk / Deletes local/remote git branches
+# Dependencies: git, grep, sort, sed
+# ==============================================================================
 
 set -e
+
+# Check dependencies
+for cmd in git grep sort sed; do
+    if ! command -v "$cmd" &> /dev/null; then
+        echo "Error: Required dependency '$cmd' is not installed or not in PATH." >&2
+        exit 1
+    fi
+done
 
 echo "=== Branch Consolidation Execution ==="
 echo "License: MIT | Risk: Minimal | Scope: Cleanup only"

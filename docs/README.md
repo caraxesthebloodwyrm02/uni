@@ -32,8 +32,11 @@ the canonical archive volume at `/home/irfankabir/` (UUID
 `cf656878-be07-4249-b8ba-10fd482aa610`), which is currently unmounted from
 this session. The live tree holds:
 
-- `platform/apparat/` — the only substantial live code (phase-handler
-  registry, SISA bootstrap, dispatcher, golding validator).
+- `mangrove_platform/apparat/` — the only substantial live code
+  (phase-handler registry, SISA bootstrap, dispatcher, golding validator).
+- `mangrove_platform/mcp/` — FastMCP server exposing Apparat as 6 tools, with a
+  security layer (`security.py`: Pydantic validation, rate limiting, audit
+  logging).
 - `tests/` — smoke tests for the `CLAUDE.md` contract and Apparat dispatch
   tests.
 - `scripts/` — `audit_workspace.sh`, `build_factbook.py`,
@@ -51,11 +54,15 @@ The only commands that actually work against `/home/cable/series/mangrove/`
 today:
 
 ```bash
-uv sync --group dev                                              # install pytest, pytest-cov, ruff
-uv run pytest                                                    # all tests
-uv run ruff check .                                              # lint
-uv run python platform/apparat/sisa.py --list-phases             # 12 Apparat phases
+unset VIRTUAL_ENV && uv sync --group dev                                              # install pytest, pytest-cov, ruff
+unset VIRTUAL_ENV && uv run python -m pytest -o "addopts=-p no:anyio -p no:cacheprovider"  # all tests (see usage.md)
+unset VIRTUAL_ENV && uv run ruff check .                                              # lint
+unset VIRTUAL_ENV && uv run python mangrove_platform/apparat/sisa.py --list-phases   # 13 Apparat phases
 ```
+
+Note: plain `uv run pytest` crashes on this host (missing `_sqlite3` breaks the
+`--cov` plugin); always pass the addopts override shown above. Full commands are
+in [`usage.md`](usage.md).
 
 A complete breakdown — including split between live and canonical-archive
 commands — is in the **Common Commands** section of
@@ -84,9 +91,10 @@ and **Governance & Safety**:
 
 The full MIT license text is materialised at the live tree root by the
 Apparat `compliance_baseline` phase
-(`platform/apparat/phase_handlers.py::compliance_baseline_handler`). The
-phase is registered and ready but is operator-deferred for direct invocation —
-run `uv run python platform/apparat/sisa.py --phase compliance_baseline`
+(`mangrove_platform/apparat/phase_handlers.py::compliance_baseline_handler`).
+The phase is registered and ready but is operator-deferred for direct
+invocation — run
+`uv run python mangrove_platform/apparat/sisa.py --phase compliance_baseline`
 after explicit operator approval. A stub reference is in
 `../pyproject.toml::license` as `{ text = "MIT" }` (PEP 639
 mixed-object form).

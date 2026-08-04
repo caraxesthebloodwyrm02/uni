@@ -1,6 +1,7 @@
 import pytest
-from apparat.api import GridCell
-from apparat.horizontal_texture_processor import HorizontalTextureProcessor
+
+from mangrove_platform.apparat.api import GridCell
+from mangrove_platform.apparat.horizontal_texture_processor import HorizontalTextureProcessor
 
 # Define a standard 2x2 input grid for all gold tests
 # Grid:

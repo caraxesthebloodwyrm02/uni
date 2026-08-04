@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 """Test the regex-driven dispatcher in horizontal_texture_processor.py."""
 
-import os
-import sys
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../mangrove_platform"))
-
-from apparat.api import GridCell  # type: ignore
-from apparat.horizontal_texture_processor import HorizontalTextureProcessor  # type: ignore
+from mangrove_platform.apparat.api import GridCell
+from mangrove_platform.apparat.horizontal_texture_processor import (
+    HorizontalTextureProcessor,
+)
 
 
 def test_dispatcher_without_params():

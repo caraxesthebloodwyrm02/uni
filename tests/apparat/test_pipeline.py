@@ -1,12 +1,6 @@
 import sys
-from pathlib import Path
 
-# Ensure mangrove root is in sys.path
-root = Path(__file__).resolve().parent.parent.parent.parent
-if str(root) not in sys.path:
-    sys.path.insert(0, str(root))
-
-from mcp import apparat_logic  # noqa: E402
+from mangrove_platform.mcp import apparat_logic
 
 
 def test_pipeline_success():
@@ -18,7 +12,7 @@ def test_pipeline_success():
     assert len(res["executed_phases"]) == 4, "Should have executed 4 phases"
     assert res["executed_phases"] == ["initiate", "scale:2.0", "normalize", "complete"]
     assert len(res["result"]) == 16, "Should have 16 cells for 4x4"
-    print("✅ Pipeline success verified.")
+    print("[OK] Pipeline success verified.")
 
 
 def test_pipeline_failure():
@@ -32,7 +26,7 @@ def test_pipeline_failure():
     assert "executed_phases" in res and res["executed_phases"] == ["initiate"], (
         "Only initiate should have completed"
     )
-    print("✅ Pipeline mid-failure verified.")
+    print("[OK] Pipeline mid-failure verified.")
 
 
 def test_state_transparency():
@@ -47,7 +41,7 @@ def test_state_transparency():
     assert state["current_phase"] == "initiate" or state["current_phase"] == "INITIATE", (
         "Phase should be update to initiate"
     )
-    print("✅ State tracking verified.")
+    print("[OK] State tracking verified.")
 
 
 def test_resolution_reset_in_pipeline():
@@ -61,7 +55,7 @@ def test_resolution_reset_in_pipeline():
     apparat_logic.run_apparat_pipeline("initiate", 8, 8)
     state_8x8 = apparat_logic.get_apparat_state(8, 8)
     assert state_8x8["cell_count"] == 64, "Processor should have reset to 8x8"
-    print("✅ Resolution reset verified.")
+    print("[OK] Resolution reset verified.")
 
 
 if __name__ == "__main__":
@@ -70,12 +64,12 @@ if __name__ == "__main__":
         test_pipeline_failure()
         test_state_transparency()
         test_resolution_reset_in_pipeline()
-        print("\n✨ ALL PIPELINE TESTS PASSED ✨")
+        print("\n[OK] ALL PIPELINE TESTS PASSED")
     except AssertionError as e:
-        print(f"\n❌ TEST FAILED: {e}")
+        print(f"\n[FAIL] TEST FAILED: {e}")
         sys.exit(1)
     except Exception as e:
-        print(f"\n💥 UNEXPECTED ERROR: {e}")
+        print(f"\n[ERROR] UNEXPECTED ERROR: {e}")
         import traceback
 
         traceback.print_exc()

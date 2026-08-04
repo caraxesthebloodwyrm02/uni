@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
-# check-large-files.sh - Check for files that exceed size limits
-# Prevents accidental commits of large files
+# ==============================================================================
+# Script Name: check-large-files.sh
+# Description: Check staged files for size limit compliance
+# Scope/Safety: Safe / Read-only pre-commit validation
+# Dependencies: git, du, cut
+# ==============================================================================
 
 set -euo pipefail
 
@@ -9,6 +13,9 @@ set -euo pipefail
 
 # Initialize configuration
 init_validation ".devin/hooks.json"
+
+# Check dependencies for agent-safe execution
+check_dependencies git du cut
 
 echo "Checking for large files..."
 
@@ -19,7 +26,7 @@ if [ -z "$staged_files" ]; then
     exit 0
 fi
 
-large_files=$(echo "$staged_files" | while read file; do
+large_files=$(echo "$staged_files" | while IFS= read -r file; do
     if [ -f "$file" ]; then
         size=$(du -k "$file" | cut -f1)
         if [ "$size" -gt "$MAX_SIZE_KB" ]; then

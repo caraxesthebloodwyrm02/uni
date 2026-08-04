@@ -1,38 +1,38 @@
-from apparat.guardrails import audit_global_assistance_baseline
+from mangrove_platform.apparat.guardrails import audit_payload
 
 
-def test_global_assistance_verified(monkeypatch):
-    """Verify that a compliant payload passes global integrity check."""
-    monkeypatch.setenv("MANGROVE_BRIBERY_THRESHOLD", "0.99")
-    monkeypatch.setenv("MANGROVE_RECURSIVE_TRIM_DEPTH", "5")
+def test_payload_within_bounds(monkeypatch):
+    """A normal payload within configured bounds returns OK."""
+    monkeypatch.setenv("MANGROVE_NOISE_THRESHOLD", "0.99")
+    monkeypatch.setenv("MANGROVE_MAX_DEPTH", "5")
 
-    result = audit_global_assistance_baseline("standard_user_voice_payload", 1)
+    result = audit_payload("standard_user_voice_payload", 1)
     assert result["safe"] is True
-    assert result["status"] == "GLOBAL_ASSISTANCE_VERIFIED"
+    assert result["status"] == "OK"
     assert "metric" in result
 
 
-def test_weak_subject_enrichment_protection():
-    """Verify that weak or sensory-deprived subjects are enriched and protected rather than dropped."""
-    result = audit_global_assistance_baseline("exhausted_legacy_subject", 1)
+def test_weak_payload_buffer():
+    """A payload marked __WEAK__ or empty triggers the buffer path."""
+    result = audit_payload("__WEAK__subject", 1)
     assert result["safe"] is True
-    assert result["status"] == "WEAK_SUBJECT_ENRICHED_AND_PROTECTED"
-    assert "Sensory enrichment applied" in result["reason"]
+    assert result["status"] == "BUFFERED"
+    assert "Buffer applied" in result["reason"]
 
 
-def test_global_assistance_recursive_boundary(monkeypatch):
-    """Verify that excessive recursive depth triggers baseline boundary protection."""
-    monkeypatch.setenv("MANGROVE_RECURSIVE_TRIM_DEPTH", "3")
+def test_payload_depth_limit(monkeypatch):
+    """Exceeding max_depth returns DEPTH_LIMIT."""
+    monkeypatch.setenv("MANGROVE_MAX_DEPTH", "3")
 
-    result = audit_global_assistance_baseline("deep_recursive_payload", 4)
+    result = audit_payload("deep_recursive_payload", 4)
     assert result["safe"] is False
-    assert result["status"] == "RECURSIVE_BOUNDARY_EXCEEDED"
+    assert result["status"] == "DEPTH_LIMIT"
 
 
-def test_global_assistance_tier_distortion(monkeypatch):
-    """Verify that noise distortions exceeding baseline threshold trigger global protection."""
-    monkeypatch.setenv("MANGROVE_BRIBERY_THRESHOLD", "0.01")
+def test_payload_noise_over(monkeypatch):
+    """A payload whose sine compression exceeds threshold returns NOISE_OVER."""
+    monkeypatch.setenv("MANGROVE_NOISE_THRESHOLD", "0.01")
 
-    result = audit_global_assistance_baseline("distorted_noise_payload", 1)
+    result = audit_payload("distorted_noise_payload", 1)
     assert result["safe"] is False
-    assert result["status"] == "TIER_DISTORTION_DETECTED"
+    assert result["status"] == "NOISE_OVER"

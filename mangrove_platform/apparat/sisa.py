@@ -18,6 +18,7 @@ report instead of a hard ImportError.
 
 from __future__ import annotations
 
+import argparse
 import importlib
 import sys
 from dataclasses import dataclass, field
@@ -136,21 +137,59 @@ def _safe_import(dotted: str) -> Any:
         return exc
 
 
+def _package_root() -> str:
+    """Return the package this module lives in (e.g. ``mangrove_platform.apparat``).
+
+    Derived from ``__name__`` so the bootstrap is robust against the package being
+    installed under any parent name (``mangrove_platform``, ``mangrove.platform``,
+    ``mangrove``, ...). Falls back to the file path's parent when ``__name__`` is
+    not a dotted package (e.g. when run as ``python sisa.py``).
+    """
+    if "." in __name__:
+        return __name__.rsplit(".", 1)[0]
+    # Script-style invocation: derive from on-disk location.
+    return Path(__file__).resolve().parent.name
+
+
 def _load_components() -> tuple[list[str], list[str]]:
     """Import components using their absolute package paths to ensure relative
     imports resolve correctly and to avoid collisions with the stdlib 'platform' module.
     """
     import importlib
 
-    # Ensure the mangrove root is in sys.path
-    # sisa.py is at mangrove/platform/apparat/sisa.py
-    root = Path(__file__).resolve().parent.parent.parent.parent  # /home/cable/series
-    if str(root) not in sys.path:
-        sys.path.insert(0, str(root))
+    pkg = _package_root()
+    parent_pkg = pkg.rsplit(".", 1)[0] if "." in pkg else None
+
+    # Ensure the project root (one above the top-level package) is on sys.path
+    # so absolute imports of the package succeed from any CWD.
+    # sisa.py lives at <root>/<parent_pkg>/apparat/sisa.py
+    if "." in pkg:
+        # Walk up (pkg.count(".") + 2) parents: one for each dotted segment
+        # in the package name (climbs out of apparat/ and parent_pkg/) plus
+        # one more to climb out of the project root itself.
+        project_root = Path(__file__).resolve().parents[pkg.count(".") + 2]
+    else:
+        # Script-style invocation: assume the operator runs from one level
+        # above the apparat/ directory. Brittle if the script is moved;
+        # the dotted-name branch above is the supported path.
+        project_root = Path(__file__).resolve().parent.parent
+    if str(project_root) not in sys.path:
+        sys.path.insert(0, str(project_root))
+
+    # Pre-import parent packages so child modules' relative imports resolve.
+    if parent_pkg is not None:
+        try:
+            importlib.import_module(parent_pkg)
+        except Exception:  # noqa: BLE001
+            pass
+    try:
+        importlib.import_module(pkg)
+    except Exception:  # noqa: BLE001
+        pass
 
     loaded, failed = [], []
     for name in ("apparat", "phase_handlers", "horizontal_texture_processor"):
-        full_name = f"mangrove.platform.apparat.{name}"
+        full_name = f"{pkg}.{name}"
         try:
             importlib.import_module(full_name)
             loaded.append(name)
@@ -166,8 +205,9 @@ def _auto_register_handlers() -> list[str]:
     run the registration block from ``horizontal_texture_processor.py``
     before invoking a phase. Returns the list of phases newly registered.
     """
-    apparat_mod = sys.modules.get("mangrove.platform.apparat.apparat")
-    phase_mod = sys.modules.get("mangrove.platform.apparat.phase_handlers")
+    pkg = _package_root()
+    apparat_mod = sys.modules.get(f"{pkg}.apparat")
+    phase_mod = sys.modules.get(f"{pkg}.phase_handlers")
     if apparat_mod is None or not hasattr(apparat_mod, "register_phase_handler"):
         return []
 
@@ -196,7 +236,8 @@ def _auto_register_handlers() -> list[str]:
 
 def _resolve_phases() -> tuple[list[str], list[str]]:
     """Cross-check PHASE_DEFINITIONS against the live registry."""
-    handler = sys.modules.get("mangrove.platform.apparat.apparat")
+    pkg = _package_root()
+    handler = sys.modules.get(f"{pkg}.apparat")
     if handler is None or not hasattr(handler, "get_phase_handler"):
         return [], list(PHASE_DEFINITIONS.keys())
     get_phase_handler = handler.get_phase_handler
@@ -241,8 +282,9 @@ def _identify_warnings(root: Path, failed: list[str], missing_prereq: list[str])
     if stray.exists() and stray.stat().st_size == 0:
         warnings.append(f"Empty stray file present: {stray}")
     # Bidirectional Registry/Enum Synchronization Check
+    pkg = _package_root()
     processor = sys.modules.get("apparat.horizontal_texture_processor") or sys.modules.get(
-        "mangrove.platform.apparat.horizontal_texture_processor"
+        f"{pkg}.horizontal_texture_processor"
     )
     if processor is not None and hasattr(processor, "Phase"):
         enum_values = {p.value for p in processor.Phase}
@@ -410,9 +452,25 @@ def to_jsonable(state: SisaState) -> dict[str, Any]:
     }
 
 
-def _build_arg_parser() -> Any:
-    import argparse
+def _validate_phase_arg(value: str) -> str:
+    """argparse ``type=`` for ``--phase``: fail fast on unknown phase names.
 
+    Lower-cased and member of PHASE_DEFINITIONS — narrows the CLI entry point
+    so a typo is reported as a usage error (exit 2) rather than silently
+    filtering to nothing and yielding an empty state. Empty string is
+    rejected to keep ``--phase ''`` from masquerading as "no filter".
+    """
+    if not value:
+        raise argparse.ArgumentTypeError("phase name must be non-empty")
+    value = value.lower()
+    if value not in PHASE_DEFINITIONS:
+        raise argparse.ArgumentTypeError(
+            f"unknown phase {value!r}; known: {sorted(PHASE_DEFINITIONS)[:5]}..."
+        )
+    return value
+
+
+def _build_arg_parser() -> Any:
     parser = argparse.ArgumentParser(
         prog="sisa",
         description="Apparat bootstrap: load components, resolve phases, surface warnings.",
@@ -432,12 +490,19 @@ def _build_arg_parser() -> Any:
         help="emit the bootstrap state as JSON to stdout",
     )
     parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+        help="enable the apparat debug surface (apa_dbg.enable())",
+    )
+    verbosity_group = parser.add_mutually_exclusive_group()
+    verbosity_group.add_argument(
         "-q",
         "--quiet",
         action="store_true",
         help="suppress the human summary; emit only warnings to stderr",
     )
-    parser.add_argument(
+    verbosity_group.add_argument(
         "-v",
         "--verbose",
         action="store_true",
@@ -454,7 +519,8 @@ def _build_arg_parser() -> Any:
         "--phase",
         default=None,
         metavar="NAME",
-        help="restrict resolution to a single phase name",
+        type=_validate_phase_arg,
+        help="restrict resolution to a single phase name (validated against PHASE_DEFINITIONS)",
     )
     parser.add_argument(
         "-l",
@@ -474,6 +540,13 @@ def _print_phases(state: SisaState) -> None:
 def main(argv: list[str] | None = None) -> int:
     parser = _build_arg_parser()
     args = parser.parse_args(argv)
+
+    if args.debug:
+        try:
+            from mangrove_platform.apparat.debug import enable as enable_debug
+            enable_debug()
+        except ImportError:
+            pass
 
     context: dict[str, Any] = {}
     if args.phase:

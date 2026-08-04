@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
-# validate-workspace.sh - Comprehensive workspace validation
-# Validates compliance with best practices, hooks, and governance rules
+# ==============================================================================
+# Script Name: validate-workspace.sh
+# Description: Validate workspace structure, file sizes, Python cache, and compliance hooks
+# Scope/Safety: Safe / Read-only validation
+# Dependencies: find, git, uv
+# ==============================================================================
 
 set -euo pipefail
 
@@ -9,6 +13,9 @@ set -euo pipefail
 
 # Initialize configuration
 init_validation ".devin/hooks.json"
+
+# Check dependencies
+check_dependencies find git uv
 
 echo -e "${BLUE}Workspace Validation${NC}"
 echo "=========================="
@@ -65,9 +72,7 @@ fi
 echo ""
 echo "Checking for forbidden patterns (3PAA-SHADOW containment)..."
 forbidden_domains=$(find . -type f \( -name "*.py" -o -name "*.toml" -o -name "*.yaml" -o -name "*.yml" -o -name "*.json" \) \
-    ! -path "./.venv/*" ! -path "./venv/*" ! -path "./.git/*" ! -path "./htmlcov/*" \
-    ! -path "./.mypy_cache/*" ! -path "./.opencode/*" ! -path "./.pytest_cache/*" \
-    ! -path "./.devin/*" ! -path "*/mangrove_platform/apparat/phase_handlers.py" -exec grep -lE "$FORBIDDEN_DOMAINS" {} \; 2>/dev/null || true)
+    "${FIND_EXCLUDES[@]}" -exec grep -lE "$FORBIDDEN_DOMAINS" {} \; 2>/dev/null || true)
 if [ -n "$forbidden_domains" ]; then
     report_error "Forbidden domains detected"
 else
@@ -75,9 +80,7 @@ else
 fi
 
 forbidden_tokens=$(find . -type f \( -name "*.py" -o -name "*.toml" -o -name "*.yaml" -o -name "*.yml" -o -name "*.json" \) \
-    ! -path "./.venv/*" ! -path "./venv/*" ! -path "./.git/*" ! -path "./htmlcov/*" \
-    ! -path "./.mypy_cache/*" ! -path "./.opencode/*" ! -path "./.pytest_cache/*" \
-    ! -path "./.devin/*" ! -path "*/mangrove_platform/apparat/phase_handlers.py" -exec grep -lE "$FORBIDDEN_TOKENS" {} \; 2>/dev/null || true)
+    "${FIND_EXCLUDES[@]}" -exec grep -lE "$FORBIDDEN_TOKENS" {} \; 2>/dev/null || true)
 if [ -n "$forbidden_tokens" ]; then
     report_error "Forbidden tokens detected"
 else
@@ -88,9 +91,7 @@ fi
 echo ""
 echo "Checking for potential secrets..."
 suspicious_files=$(find . -type f \( -name "*.py" -o -name "*.toml" -o -name "*.yaml" -o -name "*.yml" -o -name "*.json" \) \
-    ! -path "./.venv/*" ! -path "./venv/*" ! -path "./.git/*" ! -path "./htmlcov/*" \
-    ! -path "./.mypy_cache/*" ! -path "./.opencode/*" ! -path "./.pytest_cache/*" \
-    ! -path "./.devin/*" ! -path "*/mangrove_platform/apparat/phase_handlers.py" -exec grep -lE "password\s*=\s*['\"]|api[_-]?key\s*=\s*['\"]|secret\s*=\s*['\"]|token\s*=\s*['\"]|credential\s*=\s*['\"]" {} \; 2>/dev/null || true)
+    "${FIND_EXCLUDES[@]}" -exec grep -lE "$SECRET_PATTERNS_REGEX" {} \; 2>/dev/null || true)
 if [ -n "$suspicious_files" ]; then
     report_warning "Potential secrets found in: $suspicious_files"
 else

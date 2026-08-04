@@ -1,8 +1,23 @@
-#!/bin/bash
-# Measure PR impact for dependency updates
-# Run on dependency PRs to track lines changed, files affected, complexity
+#!/usr/bin/env bash
+# ==============================================================================
+# Script Name: measure-pr-impact.sh
+# Description: Track complexity and impact metrics for open Dependabot pull requests
+# Scope/Safety: Safe / Read-only GitHub API querying, creates local log folder
+# Dependencies: git, sed, gh, wc, jq, mkdir
+# ==============================================================================
 
 set -e
+
+# Check dependencies
+for cmd in git sed gh wc jq mkdir; do
+    if ! command -v "$cmd" &> /dev/null; then
+        echo "Error: Required dependency '$cmd' is not installed or not in PATH." >&2
+        if [ "$cmd" = "gh" ]; then
+            echo "Install GitHub CLI (gh) from: https://cli.github.com/" >&2
+        fi
+        exit 1
+    fi
+done
 
 echo "=== Dependency PR Impact Measurement ==="
 echo "Date: $(date)"
@@ -18,12 +33,6 @@ fi
 
 echo "Repository: $REPO"
 echo ""
-
-if ! command -v gh &> /dev/null; then
-    echo "Error: GitHub CLI (gh) not installed"
-    echo "Install from: https://cli.github.com/"
-    exit 1
-fi
 
 echo "=== Analyzing Dependency PRs ==="
 echo ""

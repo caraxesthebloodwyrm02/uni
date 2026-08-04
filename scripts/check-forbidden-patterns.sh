@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
-# check-forbidden-patterns.sh - Check for forbidden domains and tokens (3PAA-SHADOW containment)
-# This script checks code files for forbidden patterns per governance rules
+# ==============================================================================
+# Script Name: check-forbidden-patterns.sh
+# Description: Verify staged files conform to 3PAA-SHADOW containment patterns
+# Scope/Safety: Safe / Read-only pre-commit validation
+# Dependencies: git, grep, xargs, find
+# ==============================================================================
 
 set -euo pipefail
 
@@ -9,6 +13,9 @@ set -euo pipefail
 
 # Initialize configuration
 init_validation ".devin/hooks.json"
+
+# Check dependencies for agent-safe execution
+check_dependencies git grep xargs find
 
 echo "Checking for forbidden patterns (3PAA-SHADOW containment)..."
 
@@ -23,7 +30,7 @@ if in_git_repo; then
         exit 0
     fi
 
-    forbidden_domains=$(echo "$staged_files" | grep -v -E "$EXCLUDE_FILES" | xargs grep -lE "$FORBIDDEN_DOMAINS" 2>/dev/null || true)
+    forbidden_domains=$(echo "$staged_files" | grep -v -E "$EXCLUDE_FILES" | xargs -r grep -lE "$FORBIDDEN_DOMAINS" 2>/dev/null || true)
     if [ -n "$forbidden_domains" ]; then
         report_error "Forbidden domains detected (3PAA-SHADOW containment)"
         echo "Forbidden domains: $FORBIDDEN_DOMAINS"
@@ -33,7 +40,7 @@ if in_git_repo; then
     fi
 
     # Check files for forbidden tokens
-    forbidden_tokens=$(echo "$staged_files" | grep -v -E "$EXCLUDE_FILES" | xargs grep -lE "$FORBIDDEN_TOKENS" 2>/dev/null || true)
+    forbidden_tokens=$(echo "$staged_files" | grep -v -E "$EXCLUDE_FILES" | xargs -r grep -lE "$FORBIDDEN_TOKENS" 2>/dev/null || true)
     if [ -n "$forbidden_tokens" ]; then
         report_error "Forbidden tokens detected (3PAA-SHADOW containment)"
         echo "Forbidden tokens: $FORBIDDEN_TOKENS"
@@ -47,7 +54,7 @@ if in_git_repo; then
     if [ -z "$unstaged_files" ]; then
         report_success "No unstaged files to check"
     else
-        unstaged_violations=$(echo "$unstaged_files" | grep -v -E "$EXCLUDE_FILES" | xargs grep -lE "$FORBIDDEN_DOMAINS|$FORBIDDEN_TOKENS" 2>/dev/null || true)
+        unstaged_violations=$(echo "$unstaged_files" | grep -v -E "$EXCLUDE_FILES" | xargs -r grep -lE "$FORBIDDEN_DOMAINS|$FORBIDDEN_TOKENS" 2>/dev/null || true)
         if [ -n "$unstaged_violations" ]; then
             report_warning "Forbidden patterns found in unstaged files. Stage changes to check them properly."
         fi
@@ -55,8 +62,7 @@ if in_git_repo; then
 else
     # Non-git context (CI validation) - check all files
     forbidden_domains=$(find . -type f \( -name "*.py" -o -name "*.toml" -o -name "*.yaml" -o -name "*.yml" -o -name "*.json" \) \
-        ! -path "./.venv/*" ! -path "./.git/*" ! -path "./htmlcov/*" \
-        ! -path "./.devin/*" ! -path "*/mangrove_platform/apparat/phase_handlers.py" \
+        "${FIND_EXCLUDES[@]}" \
         -exec grep -lE "$FORBIDDEN_DOMAINS" {} \; 2>/dev/null || true)
     if [ -n "$forbidden_domains" ]; then
         report_error "Forbidden domains detected (3PAA-SHADOW containment)"
@@ -67,8 +73,7 @@ else
     fi
 
     forbidden_tokens=$(find . -type f \( -name "*.py" -o -name "*.toml" -o -name "*.yaml" -o -name "*.yml" -o -name "*.json" \) \
-        ! -path "./.venv/*" ! -path "./.git/*" ! -path "./htmlcov/*" \
-        ! -path "./.devin/*" ! -path "*/mangrove_platform/apparat/phase_handlers.py" \
+        "${FIND_EXCLUDES[@]}" \
         -exec grep -lE "$FORBIDDEN_TOKENS" {} \; 2>/dev/null || true)
     if [ -n "$forbidden_tokens" ]; then
         report_error "Forbidden tokens detected (3PAA-SHADOW containment)"

@@ -7,7 +7,7 @@ This directory captures the compliance-baseline strategy in deferred state.
 **Phase execution deferred by operator, 2026-07-31.**
 
 - `compliance_baseline` phase is **registered** in `platform/apparat/sisa.py`
-  (PHASE_DEFINITIONS) and **resolves** in the SISA bootstrap (12/12 phases).
+  (PHASE_DEFINITIONS).
 - The handler `compliance_baseline_handler` in `platform/apparat/phase_handlers.py`
   is **not invoked** — no LICENSE, NOTICE, or TERMS_OF_ENGAGEMENT.md has been
   written to the live tree.

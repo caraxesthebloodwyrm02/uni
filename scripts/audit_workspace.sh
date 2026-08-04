@@ -1,13 +1,28 @@
 #!/usr/bin/env bash
-# audit_workspace.sh — count empty directories and list them under /home/cable/series/mangrove.
-# Stub: real audit will be wired in Phase 2.
-#
-# Usage: bash scripts/audit_workspace.sh [root]
-# Default root: /home/cable/series/mangrove
+# ==============================================================================
+# Script Name: audit_workspace.sh
+# Description: Scan workspace directories to find and report empty folders
+# Scope/Safety: Safe / Read-only
+# Dependencies: find, ls
+# ==============================================================================
 
 set -euo pipefail
 
-ROOT="${1:-/home/cable/series/mangrove}"
+# Check dependencies
+for cmd in find ls; do
+    if ! command -v "$cmd" &> /dev/null; then
+        echo "ERROR: Required dependency '$cmd' is not installed or not in PATH." >&2
+        exit 1
+    fi
+done
+
+if [[ $# -ge 1 ]]; then
+    ROOT="$1"
+else
+    # scripts/audit_workspace.sh → derive workspace root from $0
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+fi
 
 echo "Workspace audit — root: ${ROOT}"
 echo "================================"
@@ -32,7 +47,5 @@ echo "================================"
 echo "Total directories: ${total_dirs}"
 echo "Empty directories: ${empty_count}"
 
-# Exit non-zero if any dir is empty — caller can decide policy.
-if [[ "${empty_count}" -gt 0 ]]; then
-    exit 2
-fi
+# Script is purely informational; validate-workspace.sh enforces .gitkeep policies.
+exit 0

@@ -53,6 +53,12 @@ def list_registered_phases() -> list[str]:
     return list(PHASE_REGISTRY.keys())
 
 
+# --- Hook Whitelist ---
+# Hook whitelisting lives in ``mangrove_platform.mcp.apparat_logic`` so the
+# rule is co-located with the MCP tool that consumes it (``register_apparat_hook``).
+# Adding it here as a parallel definition caused drift — see code-review Finding 6.
+
+
 # --- Built-in Handlers ---
 
 
@@ -171,16 +177,18 @@ def highlight_handler(processor, params):
 
 
 # Register built-ins with signatures and param maps
-register_phase_handler("highlight", signature={})(highlight_handler)
-register_phase_handler("normalize", signature={})(normalize_handler)
-register_phase_handler("scale", signature={"factor": float}, param_map=["factor"])(scale_handler)
-register_phase_handler(
-    "clamp", signature={"min_val": float, "max_val": float}, param_map=["min_val", "max_val"]
-)(clamp_handler)
-register_phase_handler("filter", signature={"threshold": float}, param_map=["threshold"])(
-    filter_handler
-)
-register_phase_handler("invert", signature={})(invert_handler)
+HANDLER_REGISTRY = [
+    # (name, handler, signature, param_map)
+    ("highlight", highlight_handler, {}, None),
+    ("normalize", normalize_handler, {}, None),
+    ("scale", scale_handler, {"factor": float}, ["factor"]),
+    ("clamp", clamp_handler, {"min_val": float, "max_val": float}, ["min_val", "max_val"]),
+    ("filter", filter_handler, {"threshold": float}, ["threshold"]),
+    ("invert", invert_handler, {}, None),
+]
+
+for name, handler, signature, param_map in HANDLER_REGISTRY:
+    register_phase_handler(name, signature=signature, param_map=param_map)(handler)
 
 
 def validate_acceleration_handler(processor, params):
@@ -190,13 +198,13 @@ def validate_acceleration_handler(processor, params):
     try:
         # Perform the baseline normalization check
         norm_res = validate.check_baseline_normalization()
-        if not norm_res.success:
-            raise ApparatValidationError(f"Baseline normalization failed: {norm_res.message}")
+        if not norm_res.passed:
+            raise ApparatValidationError(f"Baseline normalization failed: {norm_res.detail}")
 
         # Perform the cruise engagement check
         cruise_res = validate.check_cruise_engagement()
-        if not cruise_res.success:
-            raise ApparatValidationError(f"Cruise engagement failed: {cruise_res.message}")
+        if not cruise_res.passed:
+            raise ApparatValidationError(f"Cruise engagement failed: {cruise_res.detail}")
 
         # If both pass, return the current input data to signify continuation
         return processor.ipo.input_data

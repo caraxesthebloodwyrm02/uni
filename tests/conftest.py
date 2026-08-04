@@ -16,11 +16,13 @@ def pytest_configure(config: pytest.Config) -> None:
         "capsys_safe: mark test as safe for capsys usage to avoid embedding trap",
     )
 
+
 # Additional mitigation: ensure clean stdout/stderr state
 @pytest.fixture(autouse=True)
 def reset_capture_state() -> None:
     """Reset capture state before each test to avoid CAPSYS embedding issues."""
     import sys as _sys
+
     # Ensure stdout/stderr are not in a captured state
     if hasattr(_sys.stdout, "buffer"):
         _ = _sys.stdout.flush()
