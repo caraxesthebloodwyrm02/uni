@@ -75,10 +75,9 @@ def normalize_handler(processor, params):
             GridCell(cell.x, cell.y, 0.5, cell.texture_type) for cell in processor.ipo.input_data
         ]
     else:
+        diff = max_val - min_val
         normalized = [
-            GridCell(
-                cell.x, cell.y, (cell.value - min_val) / (max_val - min_val), cell.texture_type
-            )
+            GridCell(cell.x, cell.y, (cell.value - min_val) / diff, cell.texture_type)
             for cell in processor.ipo.input_data
         ]
     processor.ipo.input_data = normalized
@@ -149,11 +148,26 @@ def highlight_handler(processor, params):
     articles = {"a", "an", "the"}
     vowels = set("aeiou")
     updated = []
+
+    # Cache mapping of original texture type to new texture type to avoid redundant string manipulation
+    texture_cache = {}
+
     for cell in processor.ipo.input_data:
-        label = (cell.texture_type or "").strip()
+        orig_tex = cell.texture_type
+        if orig_tex in texture_cache:
+            new_tex = texture_cache[orig_tex]
+            if new_tex is orig_tex:
+                updated.append(cell)
+            else:
+                updated.append(GridCell(cell.x, cell.y, cell.value, new_tex))
+            continue
+
+        label = (orig_tex or "").strip()
         if not label:
+            texture_cache[orig_tex] = orig_tex
             updated.append(cell)
             continue
+
         first_word = label.split()[0].lower()
         tags = []
         if first_word in articles:
@@ -162,16 +176,20 @@ def highlight_handler(processor, params):
             tags.append("vowel")
         elif first_word:
             tags.append("consonant")
+
         if tags:
-            base = (
-                cell.texture_type.split("|highlight=")[0]
-                if "|highlight=" in cell.texture_type
-                else cell.texture_type
-            )
-            cell_new = GridCell(cell.x, cell.y, cell.value, f"{base}|highlight={'-'.join(tags)}")
-            updated.append(cell_new)
+            base = orig_tex.split("|highlight=")[0] if "|highlight=" in orig_tex else orig_tex
+            new_tex = f"{base}|highlight={'-'.join(tags)}"
+            if new_tex == orig_tex:
+                texture_cache[orig_tex] = orig_tex
+                updated.append(cell)
+            else:
+                texture_cache[orig_tex] = new_tex
+                updated.append(GridCell(cell.x, cell.y, cell.value, new_tex))
         else:
+            texture_cache[orig_tex] = orig_tex
             updated.append(cell)
+
     processor.ipo.input_data = updated
     return updated
 

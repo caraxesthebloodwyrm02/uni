@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from functools import cache
 
 from .api import ApparatValidationError, Phase
 
@@ -11,6 +12,7 @@ PIPELINE_PATTERN = re.compile(r"^[a-zA-Z0-9_:,._\-+]+(?:/[a-zA-Z0-9_:,._\-+]+)*$
 ALLOWED_PHASES = frozenset(phase.value for phase in Phase)
 
 
+@cache
 def split_phase_key(phase_key: str) -> tuple[str, str | None]:
     """Split a phase expression into (name, args) without a whitelist check.
 
@@ -31,6 +33,7 @@ def split_phase_key(phase_key: str) -> tuple[str, str | None]:
     return name, params_str
 
 
+@cache
 def validate_phase_name(name: str) -> str:
     """Validate that a phase name is syntactically valid and allowed."""
     if not re.match(PHASE_NAME_PATTERN, name):
@@ -42,6 +45,7 @@ def validate_phase_name(name: str) -> str:
     return name
 
 
+@cache
 def parse_phase_syntax(phase_key: str) -> tuple[str, str | None]:
     """Parse a phase expression into the phase name and optional arg string.
 
@@ -52,6 +56,7 @@ def parse_phase_syntax(phase_key: str) -> tuple[str, str | None]:
     return name, params_str
 
 
+@cache
 def validate_pipeline(pipeline: str) -> str:
     """Validate a slash-separated phase pipeline string."""
     if not isinstance(pipeline, str):

@@ -41,9 +41,7 @@ class TestBashScriptSafety:
 
         for pattern, desc in dangerous_patterns:
             # Only flag obvious cases like `command $var` or `echo $var` without quotes
-            flagged = re.findall(
-                rf"(?:^|[\s;|&]){pattern}(?:[\s;|&]|$)", content, re.MULTILINE
-            )
+            flagged = re.findall(rf"(?:^|[\s;|&]){pattern}(?:[\s;|&]|$)", content, re.MULTILINE)
             # This is informational, not a hard fail
             if flagged:
                 pytest.skip(f"{script.name}: Found potential {desc} (may be safe in context)")

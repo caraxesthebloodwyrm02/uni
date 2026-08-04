@@ -141,9 +141,9 @@ class TestGridCellVariables:
         for field_obj in fields(GridCell):
             name = field_obj.name
             assert name.islower(), f"GridCell field not lowercase: {name!r}"
-            assert (
-                name.replace("_", "").isalpha() or name.replace("_", "").isalnum()
-            ), f"GridCell field has invalid characters: {name!r}"
+            assert name.replace("_", "").isalpha() or name.replace("_", "").isalnum(), (
+                f"GridCell field has invalid characters: {name!r}"
+            )
 
 
 class TestInputProcessOutputVariables:

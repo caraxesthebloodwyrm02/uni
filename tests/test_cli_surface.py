@@ -322,9 +322,7 @@ class TestCLIPhaseDefinitions:
             assert module, f"{phase_name}: empty module"
             # Module names can be dotted paths
             parts = module.split(".")
-            assert all(p.isidentifier() for p in parts), (
-                f"{phase_name}: invalid module {module!r}"
-            )
+            assert all(p.isidentifier() for p in parts), f"{phase_name}: invalid module {module!r}"
 
     def test_phase_params_is_list(self):
         """Params should be a list."""

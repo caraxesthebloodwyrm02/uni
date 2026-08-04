@@ -45,7 +45,7 @@ class Phase(Enum):
     VALIDATE_ACCELERATION = "validate_acceleration"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class GridCell:
     """
     Single grid cell for block processing.

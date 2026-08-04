@@ -135,9 +135,7 @@ class TestDocumentationCorruption:
         ]
 
         for pattern, desc in broken_patterns:
-            assert not re.search(
-                pattern, text, re.MULTILINE
-            ), f"{doc_path.name}: Found {desc}"
+            assert not re.search(pattern, text, re.MULTILINE), f"{doc_path.name}: Found {desc}"
 
     def test_validate_workspace_py_referenced(self) -> None:
         """Main validation script should be uv run python scripts/validate_workspace.py."""
@@ -150,6 +148,6 @@ class TestDocumentationCorruption:
         for doc_path in doc_files:
             if doc_path.exists():
                 text = doc_path.read_text(encoding="utf-8")
-                assert (
-                    "uv run python scripts/validate_workspace.py" in text
-                ), f"{doc_path.name}: should reference uv run python scripts/validate_workspace.py"
+                assert "uv run python scripts/validate_workspace.py" in text, (
+                    f"{doc_path.name}: should reference uv run python scripts/validate_workspace.py"
+                )
