@@ -2,11 +2,13 @@
 import os
 from typing import Any
 
+from mangrove_platform.apparat.api import ApparatValidationError
 from mangrove_platform.apparat.apparat import (
     PHASE_REGISTRY,
     register_phase_handler,
 )
 from mangrove_platform.apparat.horizontal_texture_processor import HorizontalTextureProcessor
+from mangrove_platform.apparat.phase_validation import validate_pipeline
 from mangrove_platform.apparat.sisa import sisa, to_jsonable
 from mangrove_platform.mcp.constraints_engine import ConstraintsEngine
 
@@ -101,6 +103,11 @@ def run_apparat_pipeline(pipeline_spec: str, width: int = 4, height: int = 4) ->
     Executes a sequence of Apparat phases.
     Format: 'phase1/phase2:arg1,arg2/phase3'
     """
+    try:
+        validate_pipeline(pipeline_spec)
+    except ApparatValidationError as e:
+        return {"status": "error", "error": str(e)}
+
     phases = [p for p in pipeline_spec.split("/") if p]
     if not phases:
         return {"status": "error", "error": "Empty pipeline specification"}
