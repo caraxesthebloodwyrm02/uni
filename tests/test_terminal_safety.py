@@ -126,11 +126,6 @@ class TestPythonBashInvocation:
     @pytest.mark.parametrize("py_file", PYTHON_FILES[:20])
     def test_no_popen_without_args_list(self, py_file: Path):
         """Detect Popen calls that pass string instead of list."""
-        if not py_file.exists():
-            pytest.skip(f"{py_file} does not exist")
-
-        content = py_file.read_text(encoding="utf-8")
-
         # Pattern: Popen with string argument (not list)
         # This is complex to detect accurately, so skip
         pytest.skip("Complex pattern analysis")
@@ -247,12 +242,10 @@ class TestEnvironmentVariableUsage:
         """Code should use os.environ.get() with defaults, not direct access."""
         # This is more of a coding style guideline
         # Check a few files for pattern
-        found_safe_pattern = False
         for py_file in PYTHON_FILES[:10]:
             if py_file.exists():
                 content = py_file.read_text(encoding="utf-8")
                 if "environ.get(" in content:
-                    found_safe_pattern = True
                     break
         # At least some files should use safe pattern
         pytest.skip("Style check - informational only")
@@ -264,11 +257,6 @@ class TestStringFormattingBashCalls:
     @pytest.mark.parametrize("py_file", PYTHON_FILES[:15])
     def test_no_format_string_in_shell_commands(self, py_file: Path):
         """Detect format strings passed to shell commands."""
-        if not py_file.exists():
-            pytest.skip(f"{py_file} does not exist")
-
-        content = py_file.read_text(encoding="utf-8")
-
         # Pattern: subprocess/system with .format() or f-string containing user var
         # This is complex to detect statically
         pytest.skip("Complex pattern analysis")
@@ -314,6 +302,5 @@ class TestBashQuotingRules:
         # Check that quotes are used (informational)
         single_quotes = content.count("'")
         double_quotes = content.count('"')
-        backticks = content.count("`")
         # This is just a metric
         assert single_quotes >= 0 and double_quotes >= 0

@@ -8,12 +8,13 @@
 
 set -euo pipefail
 
-# Source shared validation library
-. scripts/validate-lib.sh
-init_validation ".devin/hooks.json"
-
 # Check dependencies
-check_dependencies git mkdir date grep
+for dep in git mkdir date grep; do
+    command -v "$dep" >/dev/null 2>&1 || { echo "missing dependency: $dep" >&2; exit 1; }
+done
+
+COMPLIANCE_DIR=".compliance-hand-off"
+STALE_BRANCH_AGE_DAYS=90
 
 OUT_DIR="${COMPLIANCE_DIR}"
 OUT_FILE="$OUT_DIR/branch-audit.csv"

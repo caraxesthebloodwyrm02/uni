@@ -12,7 +12,6 @@ Tests for:
 from __future__ import annotations
 
 import re
-from typing import Pattern
 
 import pytest
 
@@ -187,7 +186,7 @@ class TestSecretPatternsRegex:
         """Should not match commented examples."""
         # Commented-out secrets might still be detected (security feature)
         text = "# password = 'example'"
-        result = SECRET_PATTERNS.search(text)
+        SECRET_PATTERNS.search(text)
         # This is acceptable - commented code can be uncommented
 
     def test_multiline_secret_detection(self):
@@ -241,7 +240,7 @@ class TestRegexPerformance:
         """findall() should complete in reasonable time."""
         text = "test@example.com " * 1000
         # Should complete quickly
-        matches = FORBIDDEN_DOMAINS.findall(text)
+        FORBIDDEN_DOMAINS.findall(text)
         # Exact count depends on pattern
 
 
@@ -355,7 +354,7 @@ class TestRegexRuntimeValidation:
             "WOS_CLIENT = WorkOS()",
         ]
         for example in examples:
-            result = FORBIDDEN_DOMAINS.search(example)
+            FORBIDDEN_DOMAINS.search(example)
             # At least some should match
 
     def test_patterns_consistency_across_calls(self):
@@ -382,11 +381,11 @@ class TestRegexPatternIntegration:
     def test_patterns_dont_interfere(self):
         """Patterns should work independently."""
         text = 'factory.ai with WorkOS and password = "secret"'
-        
+
         result_domains = FORBIDDEN_DOMAINS.search(text)
         result_tokens = FORBIDDEN_TOKENS.search(text)
         result_secrets = SECRET_PATTERNS.search(text)
-        
+
         # Each should find their match independently
         assert result_domains is not None
         assert result_tokens is not None
@@ -399,11 +398,11 @@ class TestRegexPatternIntegration:
         api_key = "secret_123"
         Set WorkOS client
         """
-        
+
         domains_found = bool(FORBIDDEN_DOMAINS.search(text))
         tokens_found = bool(FORBIDDEN_TOKENS.search(text))
         secrets_found = bool(SECRET_PATTERNS.search(text))
-        
+
         # Multiple issues should be detected
         assert domains_found or tokens_found or secrets_found
 
@@ -424,5 +423,5 @@ class TestRegexExplicitPatternValidation:
             "token='xyz'",
         ]
         for secret in common_secrets:
-            result = SECRET_PATTERNS.search(secret)
+            SECRET_PATTERNS.search(secret)
             # At least one should match

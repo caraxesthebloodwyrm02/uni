@@ -14,11 +14,10 @@ developer humans) can find their way to the canonical documents.
   canonical-archive, and the **Governance & Safety** rules (TUV-001,
   3PAA-SHADOW, port 8788 policy, DO-NOT.html).
 - [`../.compliance-hand-off/README.md`](../.compliance-hand-off/README.md) —
-  the deferred-compliance-baseline plan. Explains why `LICENSE`,
-  `NOTICE`, and `TERMS_OF_ENGAGEMENT.md` have not been materialised in the
-  live tree, and how the materialised artefacts will be ported to the
-  canonical archive when the 538 GB volume (UUID
-  `cf656878-be07-4249-b8ba-10fd482aa610`) becomes reachable.
+  the compliance-baseline hand-off record. `LICENSE`, `NOTICE`, and
+  `TERMS_OF_ENGAGEMENT.md` are materialised at the live tree root; the
+  artefacts will be ported to the canonical archive when the 538 GB volume
+  (UUID `cf656878-be07-4249-b8ba-10fd482aa610`) becomes reachable.
 - [`../.compliance-hand-off/.audit.log`](../.compliance-hand-off/.audit.log) —
   append-only event log for hand-off events. The source of truth for what was
   shipped to `/home/irfankabir/` when the canonical volume mounts.
@@ -39,10 +38,9 @@ this session. The live tree holds:
   logging).
 - `tests/` — smoke tests for the `CLAUDE.md` contract and Apparat dispatch
   tests.
-- `scripts/` — `audit_workspace.sh`, `build_factbook.py`,
-  `corpus-index.tsv` (60 MB generated artifact).
-- `canon/` — `facts.ndjson`, a 9-row verifiable digest of canonical-archive
-  facts.
+- `scripts/` — `validate_workspace.py` (structure, secrets, forbidden
+  patterns, large-file checks), `build_factbook.py`, and branch-audit
+  tooling (`prune-stale-branches.sh`).
 - `.compliance-hand-off/` — deferred-compliance sidecar (see above).
 
 For a live snapshot of every directory under the live tree, see the **Directory
@@ -89,12 +87,9 @@ and **Governance & Safety**:
 
 ## License
 
-The full MIT license text is materialised at the live tree root by the
-Apparat `compliance_baseline` phase
+The full MIT license text is materialised at the live tree root
+(`LICENSE`, `NOTICE`, `TERMS_OF_ENGAGEMENT.md`) by the Apparat
+`compliance_baseline` phase
 (`mangrove_platform/apparat/phase_handlers.py::compliance_baseline_handler`).
-The phase is registered and ready but is operator-deferred for direct
-invocation — run
-`uv run python mangrove_platform/apparat/sisa.py --phase compliance_baseline`
-after explicit operator approval. A stub reference is in
-`../pyproject.toml::license` as `{ text = "MIT" }` (PEP 639
-mixed-object form).
+A stub reference is in `../pyproject.toml::license` as `{ text = "MIT" }`
+(PEP 639 mixed-object form).

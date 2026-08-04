@@ -56,5 +56,17 @@ sixtasks.txt
 
 # Dead stub + stray artifacts (see code review 2026-08-04)
 platform/
+finance/
+intelligence/
+operations/
+productivity/
+lab/
+workspace/
+routines/
+canon/
 combined_diff.txt
 =*
+
+# Agent tool config (per-host absolute paths)
+.claude/
+.opencode/

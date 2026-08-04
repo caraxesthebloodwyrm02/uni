@@ -13,9 +13,6 @@ from __future__ import annotations
 
 from dataclasses import fields, is_dataclass
 from pathlib import Path
-from typing import Any
-
-import pytest
 
 from mangrove_platform.apparat.api import GridCell, InputProcessOutput, Phase, PhaseParams
 from mangrove_platform.apparat.sisa import PHASE_DEFINITIONS, SisaState
@@ -209,7 +206,7 @@ class TestVariableConsistency:
 
     def test_phase_definition_handlers_consistent(self):
         """Phase definition handler names should follow pattern."""
-        for phase_name, phase_def in PHASE_DEFINITIONS.items():
+        for _phase_name, phase_def in PHASE_DEFINITIONS.items():
             handler = phase_def["handler"]
             # Handlers should be lowercase with underscores
             assert handler.islower(), f"Handler not lowercase: {handler!r}"
