@@ -1,21 +1,32 @@
 #!/usr/bin/env bash
-# check-large-files.sh - Check for files that exceed size limits
-# Prevents accidental commits of large files
+# ==============================================================================
+# Script Name: check-large-files.sh
+# Description: Check staged files for size limit compliance
+# Scope/Safety: Safe / Read-only pre-commit validation
+# Dependencies: git, du, cut
+# ==============================================================================
 
 set -euo pipefail
 
-MAX_SIZE_KB=500  # 500KB limit for code files
-MAX_SIZE_MB=5    # 5MB limit for any file
+# Source shared validation library
+. scripts/validate-lib.sh
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
+# Initialize configuration
+init_validation ".devin/hooks.json"
+
+# Check dependencies for agent-safe execution
+check_dependencies git du cut
 
 echo "Checking for large files..."
 
 # Check staged files
-large_files=$(git diff --cached --name-only --diff-filter=ACM | while read file; do
+staged_files=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null || true)
+if [ -z "$staged_files" ]; then
+    report_success "No staged files to check"
+    exit 0
+fi
+
+large_files=$(echo "$staged_files" | while IFS= read -r file; do
     if [ -f "$file" ]; then
         size=$(du -k "$file" | cut -f1)
         if [ "$size" -gt "$MAX_SIZE_KB" ]; then
@@ -25,11 +36,11 @@ large_files=$(git diff --cached --name-only --diff-filter=ACM | while read file;
 done)
 
 if [ -n "$large_files" ]; then
-    echo -e "${RED}✗ Large files detected:${NC}"
+    report_error "Large files detected:"
     echo "$large_files"
-    echo -e "${YELLOW}Maximum size: ${MAX_SIZE_KB}KB for code files${NC}"
+    report_warning "Maximum size: ${MAX_SIZE_KB}KB for code files"
     exit 1
 fi
 
-echo -e "${GREEN}✓ No large files found${NC}"
+report_success "No large files found"
 exit 0

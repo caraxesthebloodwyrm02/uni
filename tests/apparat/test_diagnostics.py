@@ -1,7 +1,8 @@
 import pytest
-from apparat.api import GridCell
-from apparat.apparat import PHASE_REGISTRY
-from apparat.horizontal_texture_processor import HorizontalTextureProcessor
+
+from mangrove_platform.apparat.api import GridCell
+from mangrove_platform.apparat.apparat import PHASE_REGISTRY
+from mangrove_platform.apparat.horizontal_texture_processor import HorizontalTextureProcessor
 
 # Only test handlers registered by apparat.py at import time that are pure
 # grid-cell transformations.  This isolates diagnostics from:
@@ -100,7 +101,7 @@ def test_empty_state_stability(processor_4x4):
                 f"Handler '{phase_name}' should return empty list for empty input, got {result}"
             )
         except Exception as e:
-            pytest.fail(f"Handler '{phase_name}' crashed on empty input: {e}")
+            pytest.fail(reason=f"Handler '{phase_name}' crashed on empty input: {e}")
 
 
 def test_resolution_transitions(processor_4x4, processor_8x8):
@@ -109,7 +110,7 @@ def test_resolution_transitions(processor_4x4, processor_8x8):
     and produces the correct number of cells.
     """
     # Test 4x4
-    from apparat.phase_handlers import initiate_handler
+    from mangrove_platform.apparat.phase_handlers import initiate_handler
 
     res_4 = initiate_handler(processor_4x4, {})
     assert len(res_4) == 4 * 4

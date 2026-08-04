@@ -1,10 +1,21 @@
 #!/usr/bin/env bash
-# scripts/prune-stale-branches.sh
-# Produce an audit CSV of remote branches: last commit date, is_merged_into_main, last_commit_sha, recommended_action
+# ==============================================================================
+# Script Name: prune-stale-branches.sh
+# Description: Generate a CSV audit report indicating remote branches that are stale or merged
+# Scope/Safety: Safe / Read-only git queries, writes report to compliance folder
+# Dependencies: git, mkdir, date, grep
+# ==============================================================================
 
 set -euo pipefail
 
-OUT_DIR=".compliance-hand-off"
+# Source shared validation library
+. scripts/validate-lib.sh
+init_validation ".devin/hooks.json"
+
+# Check dependencies
+check_dependencies git mkdir date grep
+
+OUT_DIR="${COMPLIANCE_DIR}"
 OUT_FILE="$OUT_DIR/branch-audit.csv"
 mkdir -p "$OUT_DIR"
 
@@ -41,12 +52,12 @@ while IFS= read -r ref; do
         commit_epoch=$(git show -s --format=%ct "$sha" 2>/dev/null || echo "0")
         now_epoch=$(date +%s)
         age_days=$(( (now_epoch - commit_epoch) / 86400 ))
-        if [ $age_days -ge 90 ]; then
-            rec="stale (>=90d)"
+        if [ $age_days -ge "${STALE_BRANCH_AGE_DAYS}" ]; then
+            rec="stale (>=${STALE_BRANCH_AGE_DAYS}d)"
         fi
     fi
 
-    echo "${branch},${date_iso},${sha},${merged},${rec}" >> "$OUT_FILE"
+    echo "\"${branch}\",\"${date_iso}\",\"${sha}\",\"${merged}\",\"${rec}\"" >> "$OUT_FILE"
 done < <(git for-each-ref --format='%(refname)' refs/remotes/origin 2>/dev/null | grep -v '\->' || true)
 
 echo "Audit written to $OUT_FILE"

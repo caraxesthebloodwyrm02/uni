@@ -1,11 +1,6 @@
-import os
 import sys
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-if current_dir not in sys.path:
-    sys.path.insert(0, current_dir)
-
-from apparat_logic import (  # noqa: E402
+from mangrove_platform.mcp.apparat_logic import (
     list_apparat_phases,
     run_apparat_phase,
     search_constraints,
@@ -16,8 +11,8 @@ def test_list_phases():
     print("Testing list_apparat_phases...")
     phases = list_apparat_phases()
     print(f"Found {len(phases)} phases: {phases}")
-    assert len(phases) >= 12
-    print("✓ Success\n")
+    assert len(phases) >= 13
+    print("[OK] Success\n")
 
 
 def test_run_phase():
@@ -26,16 +21,16 @@ def test_run_phase():
     init_result = run_apparat_phase("initiate", width=2, height=2)
     print(f"Initiate status: {init_result['status']}, cells: {len(init_result.get('result', []))}")
     if init_result["status"] != "success" or len(init_result.get("result", [])) == 0:
-        print(f"✗ Initiate failed: {init_result.get('error', 'No cells returned')}")
+        print(f"[FAIL] Initiate failed: {init_result.get('error', 'No cells returned')}")
         sys.exit(1)
 
     # Now run scale:2.0
     scale_result = run_apparat_phase("scale:2.0", width=2, height=2)
     print(f"Scale status: {scale_result['status']}, cells: {len(scale_result.get('result', []))}")
     if scale_result["status"] == "success" and len(scale_result.get("result", [])) == 4:
-        print("✓ Success\n")
+        print("[OK] Success\n")
     else:
-        print(f"✗ Scale failed: {scale_result.get('error', 'Unexpected cell count')}")
+        print(f"[FAIL] Scale failed: {scale_result.get('error', 'Unexpected cell count')}")
         sys.exit(1)
 
 
@@ -45,9 +40,9 @@ def test_search_constraints():
     print(f"Found {len(results)} constraints.")
     found_dispatcher = any("horizontal_texture_processor.py" in r["file"] for r in results)
     if found_dispatcher:
-        print("✓ Found dispatcher regex\n")
+        print("[OK] Found dispatcher regex\n")
     else:
-        print("✗ Did not find dispatcher regex\n")
+        print("[FAIL] Did not find dispatcher regex\n")
 
 
 if __name__ == "__main__":

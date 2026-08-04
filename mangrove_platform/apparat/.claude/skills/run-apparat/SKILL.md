@@ -15,31 +15,31 @@ This skill bootstraps the Apparat subsystem and verifies its operational health 
 Ensure the `mangrove` project is synchronized:
 ```bash
 cd /home/cable/series/mangrove
-uv sync
+unset VIRTUAL_ENV && uv sync --group dev
 ```
 
 ## Run (Agent Path)
-The primary way to drive and verify the Apparat system is via the runtime warmup script. This script bootstraps the SISA registry, verifies all 12 phases, and runs a sample processing pipeline.
+The primary way to drive and verify the Apparat system is via the runtime warmup script. This script bootstraps the SISA registry, verifies all 13 phases, and runs a sample processing pipeline.
 
 ```bash
-uv run python -m mangrove.scripts.warmup_apparat
+uv run python -m scripts.warmup_apparat
 ```
 
 ### Verify MCP Server
 To verify the Apparat MCP server is responsive, you can use the test harness:
 ```bash
-uv run python mangrove/platform/mcp/test_server.py
+uv run python mangrove_platform/mcp/test_server.py
 ```
 
 ## Run (Human Path)
 For interactive exploration, use the SISA CLI to list phases:
 ```bash
-uv run python platform/apparat/sisa.py --list-phases
+uv run python mangrove_platform/apparat/sisa.py --list-phases
 ```
 
 ## Gotchas
-- **Registry Collision**: Apparat uses a dynamic registry. If handlers aren't appearing, ensure `sisa()` is called before accessing `PHASE_HANDLERS`.
-- **SISA Readiness**: If `SISA bootstrap (ready=False)`, check for missing prerequisite files in the `platform/apparat/` directory.
+- **Registry Collision**: Apparat uses a dynamic registry. If handlers aren't appearing, ensure `sisa()` is called before the registry is read. See `docs/usage.md` Apparat section for canonical commands.
+- **SISA Readiness**: If `SISA bootstrap (ready=False)`, check for missing prerequisite files in the `mangrove_platform/apparat/` directory.
 - **MCP Authorization**: The MCP server will fail to load tools unless `~/.claude/AGREEMENT.md` is present and authorizes the server.
 
 ## Troubleshooting

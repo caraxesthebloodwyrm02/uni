@@ -1,4 +1,4 @@
-from apparat.api import (
+from mangrove_platform.apparat.api import (
     ComputationalQuantizationMatrix,
     GridCell,
     SpatialRender,

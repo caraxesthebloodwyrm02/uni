@@ -1,4 +1,4 @@
-# mypy: disable-error-code=name-defined,reportConstantRedefinition,import-not-found
+# mypy: disable-error-code=name-defined,no-redef,import-not-found
 """Machine-readable runtime validation for the acceleration system.
 Spliced from canonical archive for workspace bootstrap.
 """
@@ -9,7 +9,7 @@ from dataclasses import asdict, dataclass
 from typing import Any
 
 # Note: In the bootstrap environment, these imports are mocked or
-# pointed to the materialized components in platform/apparat/
+# pointed to the materialized components in mangrove_platform/apparat/
 try:
     from ..kernel.constants import (  # type: ignore
         DEFAULT_CRUISE_TARGET,
@@ -28,8 +28,8 @@ except ImportError:
 # We use a simple mock if the engine is not yet bootstrapped
 # to allow the 'tripwire' routing test to pass.
 try:
-    from .engine import RefractiveLens  # type: ignore[import-not-found]
-    from .wrappers import AccelerationWrapper  # type: ignore[import-not-found]
+    from .engine import RefractiveLens  # type: ignore[unresolved-import]
+    from .wrappers import AccelerationWrapper  # type: ignore[unresolved-import]
 except ImportError:
 
     class RefractiveLens:

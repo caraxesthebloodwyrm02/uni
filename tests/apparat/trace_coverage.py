@@ -52,7 +52,7 @@ def count_source_lines(filepath: str) -> tuple[int, set[int]]:
     for i, line in enumerate(lines, 1):
         stripped = line.strip()
         if in_docstring:
-            if docstring_char in stripped:
+            if stripped is not None and docstring_char in stripped:
                 in_docstring = False
             continue
         if stripped.startswith('"""') or stripped.startswith("'''"):

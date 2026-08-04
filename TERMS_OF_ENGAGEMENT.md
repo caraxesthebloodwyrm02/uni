@@ -23,12 +23,13 @@ that file does not exist. `mangrove/CLAUDE.md` is canonical in its place.
 
 The live working tree at `/home/cable/series/mangrove/` is a **stub**.
 Its `finance/`, `intelligence/`, `operations/`, `productivity/`, `lab/`,
-`workspace/`, `routines/`, `scripts/`, `platform/` directories are empty
-of code. The canonical archive lives on the 538 GB volume at
-`/home/irfankabir/` (volume UUID `cf656878-be07-4249-b8ba-10fd482aa610`),
-containing 60+ packages and 34 lab packages under
-`domains/platform/operations/lab/`. The volume is **not mounted** by
-default in this session. Verify any path before relying on it.
+`workspace/`, `routines/`, `scripts/`, `mangrove_platform/` directories
+are empty of code on this host. The canonical archive lives on the
+538 GB volume at `/home/irfankabir/` (volume UUID
+`cf656878-be07-4249-b8ba-10fd482aa610`), containing 60+ packages and
+34 lab packages under `domains/platform/operations/lab/`. The volume
+is **not mounted** by default in this session. Verify any path before
+relying on it.
 
 ## 3. Hard baseline (survives context compression)
 
@@ -46,9 +47,8 @@ default in this session. Verify any path before relying on it.
 ## 4. Governance & safety
 
 - **Trust Contract (TUV-001):** canonical rules live at
-  `/home/irfankabir/docs/AGENTS.md` on the canonical archive. The legacy
-  reference `/mnt/arch_data/.../development-contract.md` is on the
-  unmounted Arch partition and may not resolve on this host.
+  `/home/irfankabir/docs/AGENTS.md` on the canonical archive. The path
+  is on an unmounted volume and may not resolve on this host.
 - **3PAA-SHADOW Containment:** Hard Deny `factory.ai`, `cursor.com`,
   `cursor.sh`, `workos.com`. Blocked ports: 54621, 8081, 40925. Port
   8788 is blocked for all uses **except** x-change production.
@@ -66,31 +66,16 @@ default in this session. Verify any path before relying on it.
 These are the operator-curated memories that govern session behaviour,
 as listed in `~/.claude/projects/-home-cable-series/memory/MEMORY.md`:
 
-1. **user-identity** — Irfan Kabir / "Prince"; live as `cable` on
-   Fedora 43; canonical home `/home/irfankabir/` on the 538 GB volume.
-2. **pseudonym-directory-convention** — five homes on the volume are
-   separate UIDs, not aliases; access-controlled.
-3. **apparat-overview** — what Apparat is: dynamic phase-handler
-   registry for `horizontal_texture_processor.py`; creative project by
-   the user, credited to apparat-joel.
-4. **apparat-conventions** — string keys, intentional `Any` annotations,
-   registry-lookup refactor pattern, built-in handler defaults.
-5. **golding-monorepo** — slice contract (4,16,64), baseline
-   normalizer, run modes — Apparat-bounding constraints only.
-6. **reference-history-volume** — pointer to the 538 GB volume mount
-   path and current access state.
-7. **feedback-permission-tuning** — user runs `/permissions`
-   interactively; ask before escalating filesystem permission scopes.
-8. **feedback-conversation-vs-action-mode** — after tool calls, shift
-   to plain chat; no file-path dumps, byte counts, or decision tables
-   unless asked.
-9. **irfankabir-canonical-workspace** — full canonical surface on the
-   volume: domains/platform/, school/, workspace/, lab/ (34 packages),
-   routines/; live `/home/cable/series/mangrove/` tree is a stub;
-   author/license matrix.
-10. **sisa-trigger** — typing `sisa` in a prompt bootstraps the Apparat
-   workflow (`platform/apparat/sisa.py`); load phases, check prereqs,
-   surface warnings, then ask via AskUserQuestion.
+1. **mangrove-state-2026-08-03** — codebase restored; verification not
+   yet run.
+2. **mangrove-test-workspace-contract** — the 10 required `CLAUDE.md`
+   headings + governance strings asserted by `tests/test_workspace.py`.
+3. **mangrove-compliance-baseline-state** — `compliance_baseline` is
+   deferred by operator 2026-07-31; the handler must not be invoked.
+4. **mangrove-sisa-class-defect-pattern** — hardcoded structural
+   strings (package paths, env anchors) that drift from on-disk
+   reality; remediation is derive-don't-literalize via `__name__` /
+   `Path(__file__)` / `os.environ`.
 
 ## 6. Toolchain constraints
 

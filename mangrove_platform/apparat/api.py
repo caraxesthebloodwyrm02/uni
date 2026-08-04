@@ -19,7 +19,7 @@ type PhaseParams = dict[str, Any]
 
 # A signature defines the required parameters and their expected types for a phase.
 # Example: {"factor": float}
-type PhaseSignature = dict[str, type]
+type PhaseSignature = dict[str, Any]
 
 
 class Phase(Enum):
@@ -69,6 +69,8 @@ class InputProcessOutput:
     output_data: list[GridCell] | None = None
     compliance_root: str | None = None
     compliance_artifacts: list[tuple[Any, str, int]] | None = None
+    render_snapshot: list[list[float]] | None = None
+    history: list[dict[str, Any]] = field(default_factory=list)
 
 
 @dataclass
@@ -135,3 +137,25 @@ class PhaseHandler(Protocol):
     """
 
     def __call__(self, processor: IProcessor, params: PhaseParams) -> list[GridCell]: ...
+
+
+class PrePhaseHook(Protocol):
+    """
+    Hook executed before a phase handler.
+    Can modify parameters before they reach the handler.
+    """
+
+    def __call__(
+        self, processor: IProcessor, phase_name: str, params: PhaseParams
+    ) -> PhaseParams: ...
+
+
+class PostPhaseHook(Protocol):
+    """
+    Hook executed after a phase handler.
+    Can modify the result or update processor state.
+    """
+
+    def __call__(
+        self, processor: IProcessor, phase_name: str, result: list[GridCell]
+    ) -> list[GridCell]: ...

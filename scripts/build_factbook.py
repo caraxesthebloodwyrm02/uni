@@ -1,4 +1,11 @@
-"""Build /home/cable/series/mangrove/canon/facts.ndjson from regex-anchored facts.
+#!/usr/bin/env python3
+# ==============================================================================
+# Script Name: build_factbook.py
+# Description: Compile fact checklist into facts.ndjson by querying the canonical archive
+# Scope/Safety: Safe / Read-only scan of archive, writes to canon/facts.ndjson
+# Dependencies: Python 3.13+, ripgrep (rg)
+# ==============================================================================
+"""Build canon/facts.ndjson from regex-anchored facts.
 
 Pre-condition: M0+M1 complete. This script does NOT touch the canonical archive;
 it asserts over it via single regex passes and emits one JSON fact per line.
@@ -16,13 +23,45 @@ queried by key, AND every fact's regex_anchor re-greps to its source.
 from __future__ import annotations
 
 import json
-import shutil
-import subprocess
+import os
+import sys
 from pathlib import Path
 
-ARCHIVE = Path("/run/media/cable/cf656878-be07-4249-b8ba-10fd482aa610/home/irfankabir")
-OUT = Path("/home/cable/series/mangrove/canon/facts.ndjson")
-RG_BIN = shutil.which("rg") or "/home/cable/.cache/opencode/bin/rg"
+from scripts.utils import check_command_exists, load_json_config, run_command
+
+OUT = Path(__file__).resolve().parent.parent / "canon" / "facts.ndjson"
+
+# Load configuration from .devin/hooks.json if available
+CONFIG = load_json_config(Path(".devin/hooks.json")) if Path(".devin/hooks.json").exists() else {}
+
+# Canonical archive mount. Override with MANGROVE_ARCHIVE_ROOT env var or config.
+archive_env = os.environ.get("MANGROVE_ARCHIVE_ROOT")
+if archive_env:
+    ARCHIVE = Path(archive_env)
+elif "scriptConfig" in CONFIG and "buildFactbook" in CONFIG["scriptConfig"]:
+    ARCHIVE = Path(
+        CONFIG["scriptConfig"]["buildFactbook"].get(
+            "archivePath", "/run/media/cable/cf656878-be07-4249-b8ba-10fd482aa610/home/irfankabir"
+        )
+    )
+else:
+    ARCHIVE = Path("/run/media/cable/cf656878-be07-4249-b8ba-10fd482aa610/home/irfankabir")
+
+# Check for ripgrep dependency using configuration or fallback
+if "scriptConfig" in CONFIG and "buildFactbook" in CONFIG["scriptConfig"]:
+    RG_BIN = CONFIG["scriptConfig"]["buildFactbook"].get("rgBinary", "/usr/bin/rg")
+else:
+    RG_BIN = "/usr/bin/rg"
+
+if not check_command_exists(RG_BIN):
+    print(f"CRITICAL: ripgrep (rg) is required but not found at {RG_BIN}", file=sys.stderr)
+    sys.exit(1)
+
+if not ARCHIVE.is_dir():
+    sys.exit(
+        f"Canonical archive not mounted: {ARCHIVE}\n"
+        f"Mount the volume and retry, or set MANGROVE_ARCHIVE_ROOT to the right path."
+    )
 
 
 def rg(pattern: str, path: Path, count_only: bool = False) -> str:
@@ -30,8 +69,8 @@ def rg(pattern: str, path: Path, count_only: bool = False) -> str:
     cmd = [RG_BIN, "--no-heading", "-n", pattern, str(path)]
     if count_only:
         cmd.insert(1, "-c")
-    out = subprocess.run(cmd, capture_output=True, text=True, check=False)
-    return out.stdout.strip()
+    result = run_command(cmd, check=False)
+    return result.stdout.strip()
 
 
 def first(pattern: str, path: Path) -> tuple[str, str] | None:
@@ -138,36 +177,33 @@ def main() -> None:
         )
 
     # --- Fact 6: lab package count (CORRECTION: 28 dirs, 15 pyproject.toml) ---
-    n_dirs = sum(
-        1
-        for _ in (ARCHIVE / "domains/platform/operations/lab").iterdir()
-        if _.is_dir() and not _.name.startswith(".")
-    )
-    pp_count = int(
-        subprocess.run(
-            [
-                "find",
-                str(ARCHIVE / "domains/platform/operations/lab"),
-                "-maxdepth",
-                "2",
-                "-name",
-                "pyproject.toml",
-            ],
-            capture_output=True,
-            text=True,
+    lab_root = ARCHIVE / "domains/platform/operations/lab"
+    if lab_root.is_dir():
+        n_dirs = sum(1 for _ in lab_root.iterdir() if _.is_dir() and not _.name.startswith("."))
+        pp_count = int(
+            run_command(
+                [
+                    "find",
+                    str(lab_root),
+                    "-maxdepth",
+                    "2",
+                    "-name",
+                    "pyproject.toml",
+                ],
+                check=False,
+            )
+            .stdout.strip()
+            .count("\n")
+            + 1
         )
-        .stdout.strip()
-        .count("\n")
-        + 1
-    )
-    facts.append(
-        fact(
-            "lab_packages_count",
-            f"{n_dirs} lab package directories at top level; {pp_count} ship a pyproject.toml.",
-            "domains/platform/operations/lab/",
-            r"^(silver|goblet|wikidex|after_hours_package|artifacts|bipolar-wave-demo|case|common|contract|curiosity-garden|design|goblet|hats|identify_gem_token|levant|linux|microscope|mistral-test|nome|notes|painterly|painterly-perception|python-craft|read|rust-intro|silver|storyland|token-type-calculator|tools|trace_pipeline|wikidex)$",
+        facts.append(
+            fact(
+                "lab_packages_count",
+                f"{n_dirs} lab package directories at top level; {pp_count} ship a pyproject.toml.",
+                "domains/platform/operations/lab/",
+                r"^(silver|goblet|wikidex|after_hours_package|artifacts|bipolar-wave-demo|case|common|contract|curiosity-garden|design|goblet|hats|identify_gem_token|levant|linux|microscope|mistral-test|nome|notes|painterly|painterly-perception|python-craft|read|rust-intro|silver|storyland|token-type-calculator|tools|trace_pipeline|wikidex)$",
+            )
         )
-    )
 
     # --- Fact 7: python-craft collaborator ---
     f = first(

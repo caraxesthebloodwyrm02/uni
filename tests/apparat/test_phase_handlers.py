@@ -336,4 +336,4 @@ if __name__ == "__main__":
     test_compliance_baseline_handler_idempotency()
     test_compliance_baseline_handler_default_root()
     test_handler_chaining()
-    print("\n✨ All phase handler tests passed!")
+    print("\n[OK] All phase handler tests passed!")

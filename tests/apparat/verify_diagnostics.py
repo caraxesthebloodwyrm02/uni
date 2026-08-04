@@ -1,19 +1,12 @@
 import sys
-from pathlib import Path
 
-# Ensure mangrove root is in sys.path
-mangrove_dir = Path(__file__).resolve().parent.parent.parent
-platform_dir = mangrove_dir / "platform"
-for d in (str(platform_dir), str(mangrove_dir)):
-    if d not in sys.path:
-        sys.path.insert(0, d)
-
-# Bootstrap registry: phase_handlers.py defines handlers (initiate, quantize,
+# The Apparat subsystem loads phases manually via _auto_register_handlers
+# For the diagnostic tests, we want to import the known phases (initiate, scale, clamp,
 # combine, render, complete) but does not register them at import time. Mirror
-# what sisa._auto_register_handlers does — register them here explicitly.
-from apparat import phase_handlers as _phase_handlers  # noqa: E401, E402
-from apparat.apparat import register_phase_handler  # noqa: E402
-from apparat.horizontal_texture_processor import (  # noqa: E402
+# what sisa.py does.
+from mangrove_platform.apparat import phase_handlers as _phase_handlers
+from mangrove_platform.apparat.apparat import register_phase_handler
+from mangrove_platform.apparat.horizontal_texture_processor import (
     HorizontalTextureProcessor,
 )
 
@@ -26,8 +19,21 @@ _register("complete", signature={})(_phase_handlers.complete_handler)
 _register("compliance_baseline", signature={})(_phase_handlers.compliance_baseline_handler)
 
 
+def _require_positive_resolution(w: int, h: int) -> tuple[int, int]:
+    """Entry-point guard: positive int resolution only.
+
+    Narrows the CLI surface so a bad arg fails fast with a clear message
+    instead of bubbling up as an obscure IndexError deep inside process_phase.
+    """
+    if not isinstance(w, int) or not isinstance(h, int):
+        raise TypeError(f"resolution must be int, got w={type(w).__name__}, h={type(h).__name__}")
+    if w <= 0 or h <= 0:
+        raise ValueError(f"resolution must be positive, got w={w}, h={h}")
+    return w, h
+
+
 def test_diagnostics():
-    print("🚀 Starting Apparat Diagnostic Verification...")
+    print("Starting Apparat Diagnostic Verification...")
 
     # Test 1: Length Invariance
     print("\nTesting Length Invariance...")
@@ -47,9 +53,9 @@ def test_diagnostics():
         for phase in phases_to_test:
             result = processor.process_phase(phase)
             if len(result) != res:
-                print(f"❌ FAILED: Phase {phase} returned {len(result)} cells instead of {res}")
+                print(f"[FAIL] Phase {phase} returned {len(result)} cells instead of {res}")
                 return False
-        print(f"✅ {w}x{h} grid length invariance passed.")
+        print(f"[OK] {w}x{h} grid length invariance passed.")
 
     # Test 2: Coordinate Integrity
     print("\nTesting Coordinate Integrity...")
@@ -63,9 +69,9 @@ def test_diagnostics():
 
     output_coords = [(c.x, c.y) for c in processor.ipo.input_data]
     if input_coords != output_coords:
-        print("❌ FAILED: Coordinates were mutated during processing")
+        print("[FAIL] Coordinates were mutated during processing")
         return False
-    print("✅ Coordinate integrity verified.")
+    print("[OK] Coordinate integrity verified.")
 
     # Test 3: Empty State Stability
     print("\nTesting Empty State Stability...")
@@ -77,23 +83,25 @@ def test_diagnostics():
         # according to their current implementation.
         res = processor.process_phase("scale:2.0")
         if res != []:
-            print("❌ FAILED: scale should return [] for empty input")
+            print("[FAIL] scale should return [] for empty input")
             return False
 
         res = processor.process_phase("normalize")
         if res != []:
-            print("❌ FAILED: normalize should return [] for empty input")
+            print("[FAIL] normalize should return [] for empty input")
             return False
 
-        print("✅ Empty state stability verified.")
+        print("[OK] Empty state stability verified.")
     except Exception as e:
-        print(f"❌ CRASHED on empty state: {e}")
+        print(f"[FAIL] CRASHED on empty state: {e}")
         return False
 
-    print("\n✨ All Diagnostics Passed ✨")
+    print("\n[OK] All Diagnostics Passed")
     return True
 
 
 if __name__ == "__main__":
     if not test_diagnostics():
+        print("[FAIL] Diagnostics did not pass.", file=sys.stderr)
         sys.exit(1)
+    print("[OK] Diagnostics exited clean.")

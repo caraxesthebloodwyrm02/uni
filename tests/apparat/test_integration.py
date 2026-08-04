@@ -1,13 +1,8 @@
 #!/usr/bin/env python3
 """Integration tests for end-to-end Apparat pipelines."""
 
-import os
-import sys
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../mangrove_platform"))
-
-from apparat.api import GridCell, Phase
-from apparat.apparat import (
+from mangrove_platform.apparat.api import GridCell, Phase
+from mangrove_platform.apparat.apparat import (
     clamp_handler,
     filter_handler,
     invert_handler,
@@ -15,8 +10,8 @@ from apparat.apparat import (
     register_phase_handler,
     scale_handler,
 )
-from apparat.horizontal_texture_processor import HorizontalTextureProcessor
-from apparat.phase_handlers import (
+from mangrove_platform.apparat.horizontal_texture_processor import HorizontalTextureProcessor
+from mangrove_platform.apparat.phase_handlers import (
     combine_handler,
     complete_handler,
     initiate_handler,
@@ -267,4 +262,4 @@ if __name__ == "__main__":
     test_pipeline_with_different_resolutions()
     test_pipeline_with_render_phase()
     test_pipeline_data_flow()
-    print("\n✨ All integration tests passed!")
+    print("\n[OK] All integration tests passed!")

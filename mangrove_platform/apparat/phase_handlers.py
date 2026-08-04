@@ -22,13 +22,14 @@ def compliance_baseline_handler(processor: IProcessor, params: PhaseParams) -> l
 
     artefacts: list[tuple[Path, str, int]] = []
 
+    # Create LICENSE file
     license_text = (
         "MIT License\n"
         "\n"
         "Copyright (c) 2024-2026 Irfan Kabir\n"
         "\n"
         "Permission is hereby granted, free of charge, to any person obtaining a copy\n"
-        "of this software and associated documentation files (the \"Software\"), to deal\n"
+        'of this software and associated documentation files (the "Software"), to deal\n'
         "in the Software without restriction, including without limitation the rights\n"
         "to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n"
         "copies of the Software, and to permit persons to whom the Software is\n"
@@ -37,7 +38,7 @@ def compliance_baseline_handler(processor: IProcessor, params: PhaseParams) -> l
         "The above copyright notice and this permission notice shall be included in all\n"
         "copies or substantial portions of the Software.\n"
         "\n"
-        "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n"
+        'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n'
         "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n"
         "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n"
         "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n"
@@ -45,17 +46,9 @@ def compliance_baseline_handler(processor: IProcessor, params: PhaseParams) -> l
         "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n"
         "SOFTWARE.\n"
     )
-    license_path = root / "LICENSE"
-    if not license_path.exists():
-        _ = license_path.write_text(license_text, encoding="utf-8")
-    artefacts.append(
-        (
-            license_path,
-            _digest(license_path.read_text(encoding="utf-8")),
-            license_path.stat().st_size,
-        )
-    )
+    artefacts.append(_create_artifact_file(root, "LICENSE", license_text))
 
+    # Create NOTICE file
     notice_text = (
         "Mangrove — Compliance Notice\n"
         "============================\n"
@@ -65,7 +58,7 @@ def compliance_baseline_handler(processor: IProcessor, params: PhaseParams) -> l
         "  • Irfan Kabir — primary author.\n"
         "  • The Mangrove ecosystem contributors — see git log for the\n"
         "    authoritative author list per file.\n"
-        "\\ la\n"
+        "\n"
         "Project layout\n"
         "--------------\n"
         "  Live tree  : /home/cable/series/mangrove/        (stub, this repo)\n"
@@ -83,13 +76,9 @@ def compliance_baseline_handler(processor: IProcessor, params: PhaseParams) -> l
         "Licensed under the MIT License. See LICENSE in this directory\n"
         "for the full text.\n"
     )
-    notice_path = root / "NOTICE"
-    if not notice_path.exists():
-        _ = notice_path.write_text(notice_text, encoding="utf-8")
-    artefacts.append(
-        (notice_path, _digest(notice_path.read_text(encoding="utf-8")), notice_path.stat().st_size)
-    )
+    artefacts.append(_create_artifact_file(root, "NOTICE", notice_text))
 
+    # Create TERMS_OF_ENGAGEMENT.md file
     terms_text = (
         "# Terms of Engagement — Mangrove Series\n"
         "\n"
@@ -116,12 +105,13 @@ def compliance_baseline_handler(processor: IProcessor, params: PhaseParams) -> l
         "\n"
         "The live working tree at `/home/cable/series/mangrove/` is a **stub**.\n"
         "Its `finance/`, `intelligence/`, `operations/`, `productivity/`, `lab/`,\n"
-        "`workspace/`, `routines/`, `scripts/`, `platform/` directories are empty\n"
-        "of code. The canonical archive lives on the 538 GB volume at\n"
-        "`/home/irfankabir/` (volume UUID `cf656878-be07-4249-b8ba-10fd482aa610`),\n"
-        "containing 60+ packages and 34 lab packages under\n"
-        "`domains/platform/operations/lab/`. The volume is **not mounted** by\n"
-        "default in this session. Verify any path before relying on it.\n"
+        "`workspace/`, `routines/`, `scripts/`, `mangrove_platform/` directories are\n"
+        "empty of code on this host. The canonical archive lives on the 538 GB\n"
+        "volume at `/home/irfankabir/` (volume UUID\n"
+        "`cf656878-be07-4249-b8ba-10fd482aa610`), containing 60+ packages and\n"
+        "34 lab packages under `domains/platform/operations/lab/`. The volume is\n"
+        "**not mounted** by default in this session. Verify any path before\n"
+        "relying on it.\n"
         "\n"
         "## 3. Hard baseline (survives context compression)\n"
         "\n"
@@ -139,9 +129,8 @@ def compliance_baseline_handler(processor: IProcessor, params: PhaseParams) -> l
         "## 4. Governance & safety\n"
         "\n"
         "- **Trust Contract (TUV-001):** canonical rules live at\n"
-        "  `/home/irfankabir/docs/AGENTS.md` on the canonical archive. The legacy\n"
-        "  reference `/mnt/arch_data/.../development-contract.md` is on the\n"
-        "  unmounted Arch partition and may not resolve on this host.\n"
+        "  `/home/irfankabir/docs/AGENTS.md` on the canonical archive. The path\n"
+        "  is on an unmounted volume and may not resolve on this host.\n"
         "- **3PAA-SHADOW Containment:** Hard Deny `factory.ai`, `cursor.com`,\n"
         "  `cursor.sh`, `workos.com`. Blocked ports: 54621, 8081, 40925. Port\n"
         "  8788 is blocked for all uses **except** x-change production.\n"
@@ -159,31 +148,17 @@ def compliance_baseline_handler(processor: IProcessor, params: PhaseParams) -> l
         "These are the operator-curated memories that govern session behaviour,\n"
         "as listed in `~/.claude/projects/-home-cable-series/memory/MEMORY.md`:\n"
         "\n"
-        '1. **user-identity** — Irfan Kabir / "Prince"; live as `cable` on\n'
-        "   Fedora 43; canonical home `/home/irfankabir/` on the 538 GB volume.\n"
-        "2. **pseudonym-directory-convention** — five homes on the volume are\n"
-        "   separate UIDs, not aliases; access-controlled.\n"
-        "3. **apparat-overview** — what Apparat is: dynamic phase-handler\n"
-        "   registry for `horizontal_texture_processor.py`; creative project by\n"
-        "   the user, credited to apparat-joel.\n"
-        "4. **apparat-conventions** — string keys, intentional `Any` annotations,\n"
-        "   registry-lookup refactor pattern, built-in handler defaults.\n"
-        "5. **golding-monorepo** — slice contract (4,16,64), baseline\n"
-        "   normalizer, run modes — Apparat-bounding constraints only.\n"
-        "6. **reference-history-volume** — pointer to the 538 GB volume mount\n"
-        "   path and current access state.\n"
-        "7. **feedback-permission-tuning** — user runs `/permissions`\n"
-        "   interactively; ask before escalating filesystem permission scopes.\n"
-        "8. **feedback-conversation-vs-action-mode** — after tool calls, shift\n"
-        "   to plain chat; no file-path dumps, byte counts, or decision tables\n"
-        "   unless asked.\n"
-        "9. **irfankabir-canonical-workspace** — full canonical surface on the\n"
-        "   volume: domains/platform/, school/, workspace/, lab/ (34 packages),\n"
-        "   routines/; live `/home/cable/series/mangrove/` tree is a stub;\n"
-        "   author/license matrix.\n"
-        "10. **sisa-trigger** — typing `sisa` in a prompt bootstraps the Apparat\n"
-        "   workflow (`platform/apparat/sisa.py`); load phases, check prereqs,\n"
-        "   surface warnings, then ask via AskUserQuestion.\n"
+        "1. **mangrove-state-2026-08-03** — codebase restored; verification not\n"
+        "   yet run.\n"
+        "2. **mangrove-test-workspace-contract** — the 10 required `CLAUDE.md`\n"
+        "   headings + governance strings asserted by\n"
+        "   `tests/test_workspace.py`.\n"
+        "3. **mangrove-compliance-baseline-state** — `compliance_baseline` is\n"
+        "   deferred by operator 2026-07-31; the handler must not be invoked.\n"
+        "4. **mangrove-sisa-class-defect-pattern** — hardcoded structural\n"
+        "   strings (package paths, env anchors) that drift from on-disk\n"
+        "   reality; remediation is derive-don't-literalize via `__name__` /\n"
+        "   `Path(__file__)` / `os.environ`.\n"
         "\n"
         "## 6. Toolchain constraints\n"
         "\n"
@@ -210,15 +185,32 @@ def compliance_baseline_handler(processor: IProcessor, params: PhaseParams) -> l
         "Re-running the phase regenerates the file; diff against the prior\n"
         "version to surface drift.\n"
     )
-    terms_path = root / "TERMS_OF_ENGAGEMENT.md"
-    if not terms_path.exists():
-        _ = terms_path.write_text(terms_text, encoding="utf-8")
-    artefacts.append(
-        (terms_path, _digest(terms_path.read_text(encoding="utf-8")), terms_path.stat().st_size)
-    )
+    artefacts.append(_create_artifact_file(root, "TERMS_OF_ENGAGEMENT.md", terms_text))
 
     processor.ipo.compliance_artifacts = artefacts  # type: ignore[attr-defined]
     return processor.ipo.input_data
+
+
+def _create_artifact_file(root: Path, filename: str, content: str) -> tuple[Path, str, int]:
+    """Create an artifact file if it doesn't exist and return its metadata.
+
+    Args:
+        root: Root directory where the file should be created
+        filename: Name of the file to create
+        content: Content to write to the file
+
+    Returns:
+        Tuple of (file_path, digest_string, file_size)
+    """
+    file_path = root / filename
+    if not file_path.exists():
+        file_path.write_text(content, encoding="utf-8")
+
+    file_content = file_path.read_text(encoding="utf-8")
+    digest = _digest(file_content)
+    file_size = file_path.stat().st_size
+
+    return (file_path, digest, file_size)
 
 
 def _digest(text: str) -> str:
@@ -266,11 +258,26 @@ def combine_handler(processor: IProcessor, params: PhaseParams) -> list[GridCell
 
 
 def render_handler(processor: IProcessor, params: PhaseParams) -> list[GridCell]:
-    """Render spatial output via the ComputationalQuantizationMatrix."""
+    """Render spatial output via the ComputationalQuantizationMatrix.
+
+    Mirror the matrix into the SpatialRender side-channel so consumers of
+    ``output_data`` get the snapshot at render time. The handler still
+    returns ``processed_data`` (or ``input_data`` as a fallback) so existing
+    callers that consume the list of GridCells keep working.
+
+    INVARIANT: only the post-processing layer (HorizontalTextureProcessor.
+    _handle_render_phase) is allowed to write ``ipo.output_data``. This
+    handler stashes the matrix snapshot in ``ipo.render_snapshot`` and
+    returns the cell list — it does NOT write ``output_data`` itself.
+    """
     _ = params  # Satisfy type checker - params unused in this handler
     from .api import SpatialRender
 
-    _ = SpatialRender(processor.matrix)  # Satisfy type checker - result unused
+    render = SpatialRender(processor.matrix)
+    render_output = render.render()
+    # Stash the render so the matrix snapshot is reachable via the processor
+    # (developers can introspect via apparat.debug.dump_state).
+    processor.ipo.render_snapshot = render_output  # type: ignore[attr-defined]
     return processor.ipo.processed_data or processor.ipo.input_data
 
 

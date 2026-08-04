@@ -35,7 +35,7 @@ This guide provides comprehensive security practices and procedures for the Mang
 - Use proper secret management services (e.g., HashiCorp Vault)
 
 **Detection:**
-- Repository has pre-commit hooks to detect common secret patterns
+- Repository has secret-detection and forbidden-pattern checks (`.pre-commit-config.yaml` is declarative; run `bash scripts/check-secrets.sh` and `bash scripts/check-forbidden-patterns.sh` directly — the `pre-commit` framework is NOT installed)
 - CI pipeline scans for potential secrets
 - Manual review of all changes
 

@@ -1,53 +1,54 @@
 #!/usr/bin/env python3
+# ==============================================================================
+# Script Name: warmup_apparat.py
+# Description: Warm up Apparat subsystem by bootstrapping the registry and verifying phase executions
+# Scope/Safety: Safe / Read-only smoke validation
+# Dependencies: Python 3.13+, mangrove_platform (Apparat components)
+# ==============================================================================
 """
 Apparat Runtime Warmup Script
 Bootstraps the Apparat registry and executes a representative phase pipeline
 to verify the health of the Apparat subsystem.
+
+The `mangrove` project is installed editable by `uv sync` (per pyproject.toml),
+so absolute imports of `mangrove_platform.apparat.X` and `mangrove_platform.mcp.X`
+resolve under `uv run` from any CWD. No sys.path manipulation needed.
 """
 
 import sys
-from pathlib import Path
-
-# Ensure we can import from the mangrove root
-current_dir = Path(__file__).resolve().parent
-mangrove_dir = current_dir.parent
-platform_dir = mangrove_dir / "mangrove_platform"
-mcp_dir = platform_dir / "mcp"
-
-for d in (str(mcp_dir), str(platform_dir), str(mangrove_dir)):
-    if d not in sys.path:
-        sys.path.insert(0, d)
 
 try:
-    from apparat.apparat import list_registered_phases
-    from apparat.horizontal_texture_processor import HorizontalTextureProcessor
-    from apparat_logic import initialize_apparat
+    from mangrove_platform.apparat.apparat import list_registered_phases
+    from mangrove_platform.apparat.horizontal_texture_processor import (
+        HorizontalTextureProcessor,
+    )
+    from mangrove_platform.mcp.apparat_logic import initialize_apparat
 except ImportError as e:
     print(f"CRITICAL: Failed to import Apparat components: {e}")
     sys.exit(1)
 
 
 def warmup():
-    print("🚀 Starting Apparat Runtime Warmup...")
+    print("Starting Apparat Runtime Warmup...")
     print("-" * 50)
 
     # 1. Initialization
     print("\n[1/4] Initializing Apparat Registry...")
     try:
         initialize_apparat()
-        print("✓ Apparat initialized successfully")
+        print("[OK] Apparat initialized successfully")
     except Exception as e:
-        print(f"✗ Initialization failed: {e}")
+        print(f"[FAIL] Initialization failed: {e}")
         sys.exit(1)
 
     # 2. Phase Registry Verification
-    print("\n[2/4] Verifying Phase Registry...")
+    print("\n[2/4] Checking Phase Registry...")
     phases = list_registered_phases()
     print(f"Registered phases: {len(phases)}")
-    if len(phases) < 12:
-        print(f"⚠️ Warning: Only {len(phases)}/12 phases registered.")
+    if not phases:
+        print("[WARN] No phases registered.")
     else:
-        print("✓ Registry fully populated")
+        print(f"[OK] Registry populated ({len(phases)} phases)")
 
     # 3. Execution Pipeline Smoke Test
     print(
@@ -63,9 +64,9 @@ def warmup():
             result = processor.process_phase(phase)
             print(f"  Executing {phase: <15} ... OK (cells: {len(result)})")
 
-        print("✓ Pipeline execution successful")
+        print("[OK] Pipeline execution successful")
     except Exception as e:
-        print(f"✗ Pipeline failed: {e}")
+        print(f"[FAIL] Pipeline failed: {e}")
         sys.exit(1)
 
     # 4. Final State Inspection
@@ -74,14 +75,13 @@ def warmup():
     if final_cells:
         sample = final_cells[0]
         print(f"  Sample Cell(0,0): Value={sample.value:.3f}, Type={sample.texture_type}")
-        print("✓ Final state verified")
+        print("[OK] Final state inspected")
     else:
-        print("✗ Error: Final grid is empty")
+        print("[FAIL] Error: Final grid is empty")
         sys.exit(1)
 
     print("\n" + "=" * 50)
-    print("🌟 Apparat Runtime Warmup COMPLETE")
-    print("System is hot and ready for operation.")
+    print("Apparat Runtime Warmup complete.")
     print("=" * 50)
 
 

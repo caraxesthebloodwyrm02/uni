@@ -1,8 +1,20 @@
-#!/bin/bash
-# Track dependency update metrics for baseline monitoring
-# Run monthly after Dependabot creates PRs to collect data
+#!/usr/bin/env bash
+# ==============================================================================
+# Script Name: track-dependencies.sh
+# Description: Track dependency update statistics and export metrics to JSON
+# Scope/Safety: Safe / Read-only package/PR checking, writes dependency-metrics.json
+# Dependencies: git, sed, date (optional: gh, jq, uv)
+# ==============================================================================
 
 set -e
+
+# Check dependencies
+for cmd in git sed date; do
+    if ! command -v "$cmd" &> /dev/null; then
+        echo "Error: Required dependency '$cmd' is not installed or not in PATH." >&2
+        exit 1
+    fi
+done
 
 echo "=== Dependency Update Metrics ==="
 echo "Date: $(date)"
@@ -14,6 +26,12 @@ REPO=$(git remote get-url origin 2>/dev/null | sed 's/.*github.com\///' | sed 's
 if [ "$REPO" = "unknown" ]; then
     echo "Warning: Could not determine repository name from git remote"
     echo "Skipping GitHub API calls - will run local checks only"
+    HAS_GH=false
+elif ! command -v gh &> /dev/null; then
+    echo "Warning: GitHub CLI (gh) is not installed - running local checks only"
+    HAS_GH=false
+elif ! command -v jq &> /dev/null; then
+    echo "Warning: jq is not installed - running local checks only (needed for PR tracking)"
     HAS_GH=false
 else
     HAS_GH=true

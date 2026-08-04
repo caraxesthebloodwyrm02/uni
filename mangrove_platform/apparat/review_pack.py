@@ -51,7 +51,7 @@ def collect_phase2():
             },
         },
         "dispatcher": {
-            "file": "/home/cable/series/mangrove/platform/apparat/horizontal_texture_processor.py",
+            "file": "/home/cable/series/mangrove/mangrove_platform/apparat/horizontal_texture_processor.py",
             "description": "Regex-driven dispatcher supporting 'phase:arg1,arg2' syntax",
             "phases_supported": [
                 "normalize",
@@ -170,7 +170,7 @@ def render_pack():
         ]
     )
     for comp in phase2["materialized_components"]:
-        lines.append(f"- `platform/apparat/{comp}`")
+        lines.append(f"- `mangrove_platform/apparat/{comp}`")
     lines.append("")
 
     lines.extend(

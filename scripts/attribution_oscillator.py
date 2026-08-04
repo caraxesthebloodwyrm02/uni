@@ -1,19 +1,28 @@
 #!/usr/bin/env python3
+# ==============================================================================
+# Script Name: attribution_oscillator.py
+# Description: Generate and append checksum of runtime and binaries to compliance log on git checkout/session boundary
+# Scope/Safety: Safe / Writes to compliance audit log
+# Dependencies: Python 3.13+
+# ==============================================================================
 """
-Attribution Oscillator & Checkout Modulator.
-Hooks into git checkout / session boundaries to calculate a balanced,
-cryptographic sine-wave squash (normalized signature) of the runtime,
-environment, and binary states, solving the intelligence attribution void.
+Attribution Chain: SHA256 digest of the runtime, environment, and binary
+state at git checkout / session boundaries. Writes the digest to
+`.compliance-hand-off/.audit.log` as literal evidence; no verification claim
+is made.
+
+The chain is literal: a checksum and a heads-pointer. Nothing more.
 """
 
 import argparse
 import datetime
 import getpass
 import hashlib
-import math
 import socket
 import sys
 from pathlib import Path
+
+from scripts.config_loader import get_setting
 
 # The core binaries / structural definitions to track
 CORE_BINARIES = [
@@ -34,37 +43,12 @@ def sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
-def calculate_sine_squash(raw_signature: bytes) -> str:
-    """
-    Transform variables into cogs:
-    Analyze dynamics, prioritize balance sine shapes, squash peaks.
-    This applies a normalized sine transformation to the byte values
-    to produce a bounded 'behavior vs reality' metric (0.0 to 1.0).
-    """
-    if not raw_signature:
-        return "0.0000"
-
-    # Map byte values to a sine wave phase (-pi to pi)
-    # and sum their absolute amplitudes to squash peaks.
-    total_amplitude = 0.0
-    for b in raw_signature:
-        # map 0-255 to -pi to pi
-        phase = (b / 255.0) * 2 * math.pi - math.pi
-        total_amplitude += abs(math.sin(phase))
-
-    # Normalize by the number of bytes (max possible amplitude per byte is 1.0)
-    normalized = total_amplitude / len(raw_signature)
-    return f"{normalized:.4f}"
-
-
 def main():
-    parser = argparse.ArgumentParser(description="Attribution Oscillator Pipeline")
+    parser = argparse.ArgumentParser(description="Attribution Chain")
     parser.add_argument("--prev-head", default="HEAD@{1}", help="Previous commit hash")
     parser.add_argument("--new-head", default="HEAD", help="New commit hash")
-    parser.add_argument("--flag", default="1", help="Branch (1) or File (0) checkout flag")
     args = parser.parse_args()
 
-    # 1. Gather Variables
     # Runtime
     runtime_ts = datetime.datetime.now(datetime.UTC).isoformat()
 
@@ -74,7 +58,7 @@ def main():
     env_py = sys.version.split(" ")[0]
     environment_cog = f"{env_user}@{env_host}|py-{env_py}"
 
-    # Binary (no exceptions)
+    # Binary
     repo_root = Path(__file__).resolve().parent.parent
     binary_cogs = {}
     for b in CORE_BINARIES:
@@ -82,33 +66,28 @@ def main():
 
     binary_summary = "|".join([f"{k}:{v[:8]}" for k, v in binary_cogs.items()])
 
-    # 2. Methodology A/B Transformation & Oscillator Pipeline
-    # Hook the variables and run them through modulation locally.
-    payload = f"{runtime_ts}::{environment_cog}::{binary_summary}::{args.prev_head}->{args.new_head}::{args.flag}"
-
-    # Checksum match (SHA256)
+    # Payload + SHA256
+    payload = (
+        f"{runtime_ts}::{environment_cog}::{binary_summary}::{args.prev_head}->{args.new_head}"
+    )
     digest = hashlib.sha256(payload.encode("utf-8"))
     checksum_hex = digest.hexdigest()
 
-    # Squash peaks & append balanced sine shapes
-    sine_score = calculate_sine_squash(digest.digest())
+    # Append literal evidence to audit log
+    compliance_dir = get_setting(["environment", "complianceDirectory"], ".compliance-hand-off")
+    audit_log_path = repo_root / compliance_dir / ".audit.log"
+    log_entry = f"{runtime_ts}  checkout-attribution  {env_user}-oscillator  sum:{checksum_hex[:12]} | heads:{args.prev_head}->{args.new_head}\n"
 
-    # 3. Constraint Relevant Statement & Synthesis
-    constraint_stmt = "INTELLIGENCE_AUTH_VERIFIED"
-
-    # 4. Finalization & Validation Output
-    audit_log_path = repo_root / ".compliance-hand-off" / ".audit.log"
-
-    # Log behavior vs facts/reality
-    log_entry = f"{runtime_ts}  checkout-attribution  {env_user}-oscillator  {constraint_stmt} | A/B-sine:{sine_score} | sum:{checksum_hex[:12]} | heads:{args.prev_head}->{args.new_head}\n"
-
-    if audit_log_path.exists():
+    try:
+        # Ensure the directory exists and write to the audit log
+        audit_log_path.parent.mkdir(parents=True, exist_ok=True)
         with open(audit_log_path, "a") as f:
             f.write(log_entry)
+    except OSError as e:
+        print(f"CRITICAL: Failed to write to audit log: {e}", file=sys.stderr)
+        return 1
 
-    print(
-        f"Attribution Oscillator complete. Sine shape factor: {sine_score}. Checksum: {checksum_hex[:12]}"
-    )
+    print(f"Attribution chain recorded. Checksum: {checksum_hex[:12]}")
     return 0
 
 

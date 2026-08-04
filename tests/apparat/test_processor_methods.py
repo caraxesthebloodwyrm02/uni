@@ -1,13 +1,8 @@
 #!/usr/bin/env python3
 """Tests for missing HorizontalTextureProcessor methods."""
 
-import os
-import sys
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../mangrove_platform"))
-
-from apparat.api import GridCell, Phase
-from apparat.horizontal_texture_processor import HorizontalTextureProcessor
+from mangrove_platform.apparat.api import GridCell, Phase
+from mangrove_platform.apparat.horizontal_texture_processor import HorizontalTextureProcessor
 
 
 def test_process_forward_slash():
@@ -15,8 +10,8 @@ def test_process_forward_slash():
     processor = HorizontalTextureProcessor(4, 4)
 
     # Register minimal handlers for basic phases
-    from apparat.apparat import register_phase_handler
-    from apparat.phase_handlers import (
+    from mangrove_platform.apparat.apparat import register_phase_handler
+    from mangrove_platform.apparat.phase_handlers import (
         complete_handler,
         initiate_handler,
         quantize_handler,
@@ -50,8 +45,8 @@ def test_process_forward_slash_turn_counter():
     """Test that process_forward_slash increments turn counter."""
     processor = HorizontalTextureProcessor(4, 4)
 
-    from apparat.apparat import register_phase_handler
-    from apparat.phase_handlers import complete_handler, initiate_handler
+    from mangrove_platform.apparat.apparat import register_phase_handler
+    from mangrove_platform.apparat.phase_handlers import complete_handler, initiate_handler
 
     register_phase_handler("initiate", signature={})(initiate_handler)
     register_phase_handler("complete", signature={})(complete_handler)
@@ -316,4 +311,4 @@ if __name__ == "__main__":
     test_matrix_read_row()
     test_generator_initialization()
     test_processor_initialization()
-    print("\n✨ All processor method tests passed!")
+    print("\n[OK] All processor method tests passed!")

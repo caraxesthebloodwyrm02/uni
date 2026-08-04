@@ -1,31 +1,17 @@
+# Determine the mangrove root from this file's location (mangrove_platform/mcp/apparat_logic.py).
 import os
-import sys
 from typing import Any
 
-# Ensure we are in the mangrove root for imports
-current_dir = os.path.dirname(os.path.abspath(__file__))
-platform_dir = os.path.abspath(os.path.join(current_dir, "../"))
-mangrove_dir = os.path.abspath(os.path.join(current_dir, "../../"))
-if platform_dir not in sys.path:
-    sys.path.insert(0, platform_dir)
-if mangrove_dir not in sys.path:
-    sys.path.insert(0, mangrove_dir)
+from mangrove_platform.apparat.apparat import (
+    PHASE_REGISTRY,
+    register_phase_handler,
+)
+from mangrove_platform.apparat.horizontal_texture_processor import HorizontalTextureProcessor
+from mangrove_platform.apparat.sisa import sisa, to_jsonable
+from mangrove_platform.mcp.constraints_engine import ConstraintsEngine
 
-try:
-    from apparat.apparat import (
-        PHASE_REGISTRY,
-        register_phase_handler,
-    )
-    from apparat.horizontal_texture_processor import HorizontalTextureProcessor
-    from apparat.sisa import sisa, to_jsonable
-except ImportError as e:
-    print(f"Error importing Apparat components: {e}")
-    raise e
-
-try:
-    from .constraints_engine import ConstraintsEngine  # noqa: E402
-except ImportError:
-    from constraints_engine import ConstraintsEngine  # noqa: E402
+_APPARAT_LOGIC_DIR = os.path.dirname(os.path.abspath(__file__))
+mangrove_dir = os.path.abspath(os.path.join(_APPARAT_LOGIC_DIR, "../.."))
 
 
 def initialize_apparat():
@@ -34,7 +20,7 @@ def initialize_apparat():
     Populates the registry with both built-in and specialized phase handlers.
     """
     # 1. Register specialized handlers from phase_handlers.py
-    from apparat.phase_handlers import (
+    from mangrove_platform.apparat.phase_handlers import (
         combine_handler,
         complete_handler,
         compliance_baseline_handler,
@@ -162,6 +148,21 @@ def search_constraints(query: str | None = None) -> list[dict[str, Any]]:
     Locates systemic constraints, rules, and limits embedded in the codebase.
     """
     return constraints_engine.search(query)
+
+
+def is_approved_hook(handler_name: str) -> bool:
+    """
+    Validates if a given handler name is in the whitelist of approved Apparat hooks.
+    This prevents arbitrary code execution via MCP hook registration.
+    """
+    approved_hooks = {
+        "_system_baseline_update",
+        "_system_audit_log",
+        "_post_scale",
+        "_post_render",
+        "_post_complete",
+    }
+    return handler_name in approved_hooks
 
 
 # Run initialization on module load

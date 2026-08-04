@@ -26,7 +26,6 @@ implementation without breaking CI.
 """
 
 import json
-import os
 import subprocess
 import sys
 from collections.abc import Callable
@@ -35,17 +34,16 @@ from typing import Any
 import pytest
 
 import mangrove_platform.apparat.src.golding.code.validate as _code_validate
-import mangrove_platform.apparat.src.golding.validate as validate  # noqa: E402
-
-# Add the golding module to the path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../mangrove_platform/apparat/src"))
+import mangrove_platform.apparat.src.golding.validate as validate
 
 # Skip the entire module if the companion implementation is not
 # importable. This is the bridge between tracked-scope tests and
 # structural-excess source: the test can be reviewed and merged
 # before the implementation lands, without breaking the build.
-_validate_spec = pytest.importorskip("golding.validate", reason="golding.validate is not importable; mangrove_platform/apparat/src/golding/validate.py has not been bootstrapped.")  # type: ignore[arg-type]
-
+_validate_spec = pytest.importorskip(
+    "mangrove_platform.apparat.src.golding.validate",
+    reason="mangrove_platform.apparat.src.golding.validate is not importable.",
+)  # type: ignore[arg-type]
 
 
 # ---------------------------------------------------------------------------
@@ -70,7 +68,9 @@ EXPECTED_EXIT_CODES = {
 # ---------------------------------------------------------------------------
 
 
-def _patched_check(name: str, passed: bool, detail: dict[str, Any] | None = None) -> Callable[[], Any]:
+def _patched_check(
+    name: str, passed: bool, detail: dict[str, Any] | None = None
+) -> Callable[[], Any]:
     """Build a fake check function whose CheckResult has the requested
     shape. Used with monkeypatch.setattr to replace validate.CHECKS.
     """
@@ -106,7 +106,9 @@ def test_clean_config_returns_zero(monkeypatch: pytest.MonkeyPatch) -> None:
     assert validate.main() == 0
 
 
-def test_clean_config_emits_json_lines(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
+def test_clean_config_emits_json_lines(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
     """Each check emits a single JSON line, regardless of pass/fail.
     The format must be stable because CI greps the log.
     """
@@ -177,7 +179,9 @@ def test_unhandled_exception_returns_one(monkeypatch: pytest.MonkeyPatch) -> Non
     assert validate.main() == 1
 
 
-def test_unhandled_exception_emits_error_payload(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
+def test_unhandled_exception_emits_error_payload(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
     """When a check raises, the JSON line on stdout carries the error
     string so CI logs can show the cause without re-running.
     """
@@ -262,7 +266,7 @@ def test_exit_code_table_matches_implementation() -> None:
         # exit code in the error message.
         original = _code_validate.CHECKS
         try:
-            _code_validate.CHECKS = [_patched_check(name, passed=False)]
+            _code_validate.CHECKS = [_patched_check(name, passed=False)]  # type: ignore[invalid-assignment]
             actual_code = validate.main()
             assert actual_code == expected_code, (
                 f"check {name!r}: expected exit {expected_code}, got {actual_code}"
@@ -329,17 +333,11 @@ def test_subprocess_zero_on_clean_config() -> None:
     ensures the import has already succeeded, so by the time this
     test runs the implementation is present in the environment.
     """
-    env = os.environ.copy()
-    env["PYTHONPATH"] = (
-        f"{os.path.abspath('mangrove_platform/apparat/src')}{os.pathsep}{env.get('PYTHONPATH', '')}"
-    )
     result = subprocess.run(
-        [sys.executable, "-m", "golding.validate"],
+        [sys.executable, "-m", "mangrove_platform.apparat.src.golding.validate"],
         capture_output=True,
         text=True,
-        env=env,
     )
     assert result.returncode == 0, (
         f"validator exited {result.returncode}\nstdout: {result.stdout}\nstderr: {result.stderr}"
     )
-

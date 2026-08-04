@@ -23,12 +23,65 @@
     "virtualEnvironment": ".venv",
     "maxFileSizeKB": 500,
     "forbiddenDomains": ["factory.ai", "cursor.com", "cursor.sh", "workos.com"],
-    "forbiddenTokens": ["WorkOS", "Factory"]
+    "forbiddenTokens": ["WorkOS", "Factory"],
+    "staleBranchAgeDays": 90,
+    "complianceDirectory": ".compliance-hand-off",
+    "pythonInstallVersion": "3.13.14",
+    "installPrefix": "/home/cable/local",
+    "guardrailDepth": 5,
+    "profilingGridSizes": [4, 16, 32, 64],
+    "secretPatterns": [
+      "password\\s*=\\s*['\"]",
+      "api[_-]?key\\s*=\\s*['\"]",
+      "secret\\s*=\\s*['\"]",
+      "token\\s*=\\s*['\"]",
+      "credential\\s*=\\s*['\"]",
+      "aws[_-]?access[_-]?key\\s*=",
+      "private[_-]?key\\s*=",
+      "bearer\\s+[A-Za-z0-9_\\-\\.]+"
+    ],
+    "buildConstraints": {
+      "requires-python": ">=3.13,<3.14",
+      "mcp": ">=2.0.0,<3",
+      "pydantic": ">=2.0,<3",
+      "pytest-cov": ">=7.1.0,<8",
+      "pytest": ">=8.3.0,<9",
+      "ruff": ">=0.4.0,<1"
+    }
   },
   "workspaceValidation": {
     "requireEmptyDirsToHaveGitkeep": true,
     "requireAllStubDirsToHaveGitkeep": true,
     "allowDocumentationOutsideDocs": false,
     "maxTranscriptFiles": 0
+  },
+  "scriptConfig": {
+    "guardrailHeatmap": {
+      "targetPaths": {
+        "mcpServer": "mangrove_platform/mcp/apparat_server.py",
+        "hygieneTest": "tests/test_dependency_hygiene.py",
+        "checkoutHook": ".git/hooks/post-checkout"
+      },
+      "severityThresholds": {
+        "safeDepth": 3,
+        "criticalDepth": 1
+      }
+    },
+    "buildFactbook": {
+      "rgBinary": "/usr/bin/rg",
+      "archivePath": "/run/media/cable/cf656878-be07-4249-b8ba-10fd482aa610/home/irfankabir",
+      "factValidation": {
+        "minLabPackages": 28,
+        "expectedPaymentHardlines": 9
+      }
+    },
+    "attributionOscillator": {
+      "auditLogPath": ".compliance-hand-off/.audit.log",
+      "coreBinaries": [
+        "uv.lock",
+        "pyproject.toml",
+        "mangrove_platform/apparat/sisa.py"
+      ]
+    }
   }
 }
