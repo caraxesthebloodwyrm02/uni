@@ -1,3 +1,10 @@
+#!/usr/bin/env python3
+# ==============================================================================
+# Script Name: build_factbook.py
+# Description: Compile fact checklist into facts.ndjson by querying the canonical archive
+# Scope/Safety: Safe / Read-only scan of archive, writes to canon/facts.ndjson
+# Dependencies: Python 3.13+, ripgrep (rg)
+# ==============================================================================
 """Build canon/facts.ndjson from regex-anchored facts.
 
 Pre-condition: M0+M1 complete. This script does NOT touch the canonical archive;
@@ -17,20 +24,34 @@ from __future__ import annotations
 
 import json
 import os
-import shutil
-import subprocess
 import sys
 from pathlib import Path
 
-# Canonical archive mount. Override with MANGROVE_ARCHIVE_ROOT env var.
-ARCHIVE = Path(
-    os.environ.get(
-        "MANGROVE_ARCHIVE_ROOT",
-        "/run/media/cable/cf656878-be07-4249-b8ba-10fd482aa610/home/irfankabir",
-    )
-)
+from scripts.utils import check_command_exists, load_json_config, run_command
+
 OUT = Path(__file__).resolve().parent.parent / "canon" / "facts.ndjson"
-RG_BIN = shutil.which("rg") or "/home/cable/.cache/opencode/bin/rg"
+
+# Load configuration from .devin/hooks.json if available
+CONFIG = load_json_config(Path(".devin/hooks.json")) if Path(".devin/hooks.json").exists() else {}
+
+# Canonical archive mount. Override with MANGROVE_ARCHIVE_ROOT env var or config.
+archive_env = os.environ.get("MANGROVE_ARCHIVE_ROOT")
+if archive_env:
+    ARCHIVE = Path(archive_env)
+elif "scriptConfig" in CONFIG and "buildFactbook" in CONFIG["scriptConfig"]:
+    ARCHIVE = Path(CONFIG["scriptConfig"]["buildFactbook"].get("archivePath", "/run/media/cable/cf656878-be07-4249-b8ba-10fd482aa610/home/irfankabir"))
+else:
+    ARCHIVE = Path("/run/media/cable/cf656878-be07-4249-b8ba-10fd482aa610/home/irfankabir")
+
+# Check for ripgrep dependency using configuration or fallback
+if "scriptConfig" in CONFIG and "buildFactbook" in CONFIG["scriptConfig"]:
+    RG_BIN = CONFIG["scriptConfig"]["buildFactbook"].get("rgBinary", "/usr/bin/rg")
+else:
+    RG_BIN = "/usr/bin/rg"
+
+if not check_command_exists(RG_BIN):
+    print(f"CRITICAL: ripgrep (rg) is required but not found at {RG_BIN}", file=sys.stderr)
+    sys.exit(1)
 
 if not ARCHIVE.is_dir():
     sys.exit(
@@ -44,8 +65,8 @@ def rg(pattern: str, path: Path, count_only: bool = False) -> str:
     cmd = [RG_BIN, "--no-heading", "-n", pattern, str(path)]
     if count_only:
         cmd.insert(1, "-c")
-    out = subprocess.run(cmd, capture_output=True, text=True, check=False)
-    return out.stdout.strip()
+    result = run_command(cmd, check=False)
+    return result.stdout.strip()
 
 
 def first(pattern: str, path: Path) -> tuple[str, str] | None:
@@ -158,7 +179,7 @@ def main() -> None:
             1 for _ in lab_root.iterdir() if _.is_dir() and not _.name.startswith(".")
         )
         pp_count = int(
-            subprocess.run(
+            run_command(
                 [
                     "find",
                     str(lab_root),
@@ -167,8 +188,7 @@ def main() -> None:
                     "-name",
                     "pyproject.toml",
                 ],
-                capture_output=True,
-                text=True,
+                check=False
             )
             .stdout.strip()
             .count("\n")

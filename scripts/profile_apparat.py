@@ -1,18 +1,22 @@
+#!/usr/bin/env python3
+# ==============================================================================
+# Script Name: profile_apparat.py
+# Description: Profile Apparat processing pipeline across different grid sizes.
+# Scope/Safety: Safe / Read-only
+# Dependencies: Python 3.13+, mangrove_platform (Apparat components)
+# ==============================================================================
 import sys
 import time
-from pathlib import Path
 
-# Setup paths
-current_dir = Path(__file__).resolve().parent
-root_dir = current_dir.parent
-platform_dir = root_dir / "mangrove_platform"
-mcp_dir = platform_dir / "mcp"
-for d in (str(mcp_dir), str(platform_dir), str(root_dir)):
-    if d not in sys.path:
-        sys.path.insert(0, d)
+from scripts.config_loader import get_setting
 
-from apparat.horizontal_texture_processor import HorizontalTextureProcessor  # noqa: E402
-from apparat_logic import initialize_apparat  # noqa: E402
+try:
+    from mangrove_platform.apparat.horizontal_texture_processor import HorizontalTextureProcessor
+    from mangrove_platform.mcp.apparat_logic import initialize_apparat
+except ImportError as e:
+    print(f"CRITICAL: Failed to import Apparat components: {e}", file=sys.stderr)
+    print("Please run this script using 'uv run' to ensure all dependencies are available.", file=sys.stderr)
+    sys.exit(1)
 
 
 def profile_pipeline(width, height):
@@ -28,12 +32,17 @@ def profile_pipeline(width, height):
     return (end_time - start_time) * 1000  # ms
 
 
-sizes = [4, 16, 32, 64]
-results = {}
-for s in sizes:
-    t = profile_pipeline(s, s)
-    results[s] = t
+def main():
+    sizes = get_setting(["environment", "profilingGridSizes"], [4, 16, 32, 64])
+    results = {}
+    for s in sizes:
+        t = profile_pipeline(s, s)
+        results[s] = t
 
-print("Profiling Results (Grid Size x Grid Size -> Latency):")
-for s in sizes:
-    print(f"{s}x{s}: {results[s]:.2f}ms")
+    print("Profiling Results (Grid Size x Grid Size -> Latency):")
+    for s in sizes:
+        print(f"{s}x{s}: {results[s]:.2f}ms")
+
+
+if __name__ == "__main__":
+    main()
