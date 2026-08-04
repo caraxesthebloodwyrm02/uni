@@ -3,6 +3,9 @@
 # Provides: init_validation, color variables, report_error, report_warning, report_success
 
 # Note: this script is intended to be sourced by the individual check scripts.
+# Callers (4): check-secrets.sh, check-large-files.sh, check-forbidden-patterns.sh,
+# validate-workspace.sh — all source this on line 8. Do not delete without
+# updating each consumer to inline its own counter / color variables.
 
 # Colors
 RED='\033[0;31m'
@@ -29,17 +32,17 @@ warnings=0
 violations_found=0
 
 report_error() {
-    echo -e "${RED}✗ $1${NC}"
+    echo -e "${RED}[ERROR] $1${NC}"
     errors=$((errors + 1))
 }
 
 report_warning() {
-    echo -e "${YELLOW}⚠ $1${NC}"
+    echo -e "${YELLOW}[WARN] $1${NC}"
     warnings=$((warnings + 1))
 }
 
 report_success() {
-    echo -e "${GREEN}✓ $1${NC}"
+    echo -e "${GREEN}[OK] $1${NC}"
 }
 
 # Initialize configuration from a JSON file (optional).

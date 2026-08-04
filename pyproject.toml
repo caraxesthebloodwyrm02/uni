@@ -20,6 +20,7 @@ classifiers = [
 ]
 dependencies = [
     "mcp>=2.0.0,<3",
+    "pydantic>=2.0,<3",
 ]
 
 [dependency-groups]
@@ -34,8 +35,8 @@ packages = ["mangrove_platform"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["mangrove_platform"]
-addopts = ["--strict-markers", "-p", "no:anyio", "-p", "no:cacheprovider", "--cov=mangrove_platform", "--cov-report=term", "--cov-report=html", "--cov-report=xml"]
+pythonpath = ["mangrove_platform", "."]
+addopts = ["--strict-markers", "-p", "no:anyio", "-p", "no:cacheprovider"]
 
 [tool.coverage.run]
 source = ["mangrove_platform"]

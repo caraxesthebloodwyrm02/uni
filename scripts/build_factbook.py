@@ -1,4 +1,4 @@
-"""Build /home/cable/series/mangrove/canon/facts.ndjson from regex-anchored facts.
+"""Build canon/facts.ndjson from regex-anchored facts.
 
 Pre-condition: M0+M1 complete. This script does NOT touch the canonical archive;
 it asserts over it via single regex passes and emits one JSON fact per line.
@@ -16,13 +16,27 @@ queried by key, AND every fact's regex_anchor re-greps to its source.
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
-ARCHIVE = Path("/run/media/cable/cf656878-be07-4249-b8ba-10fd482aa610/home/irfankabir")
-OUT = Path("/home/cable/series/mangrove/canon/facts.ndjson")
+# Canonical archive mount. Override with MANGROVE_ARCHIVE_ROOT env var.
+ARCHIVE = Path(
+    os.environ.get(
+        "MANGROVE_ARCHIVE_ROOT",
+        "/run/media/cable/cf656878-be07-4249-b8ba-10fd482aa610/home/irfankabir",
+    )
+)
+OUT = Path(__file__).resolve().parent.parent / "canon" / "facts.ndjson"
 RG_BIN = shutil.which("rg") or "/home/cable/.cache/opencode/bin/rg"
+
+if not ARCHIVE.is_dir():
+    sys.exit(
+        f"Canonical archive not mounted: {ARCHIVE}\n"
+        f"Mount the volume and retry, or set MANGROVE_ARCHIVE_ROOT to the right path."
+    )
 
 
 def rg(pattern: str, path: Path, count_only: bool = False) -> str:
@@ -138,36 +152,36 @@ def main() -> None:
         )
 
     # --- Fact 6: lab package count (CORRECTION: 28 dirs, 15 pyproject.toml) ---
-    n_dirs = sum(
-        1
-        for _ in (ARCHIVE / "domains/platform/operations/lab").iterdir()
-        if _.is_dir() and not _.name.startswith(".")
-    )
-    pp_count = int(
-        subprocess.run(
-            [
-                "find",
-                str(ARCHIVE / "domains/platform/operations/lab"),
-                "-maxdepth",
-                "2",
-                "-name",
-                "pyproject.toml",
-            ],
-            capture_output=True,
-            text=True,
+    lab_root = ARCHIVE / "domains/platform/operations/lab"
+    if lab_root.is_dir():
+        n_dirs = sum(
+            1 for _ in lab_root.iterdir() if _.is_dir() and not _.name.startswith(".")
         )
-        .stdout.strip()
-        .count("\n")
-        + 1
-    )
-    facts.append(
-        fact(
-            "lab_packages_count",
-            f"{n_dirs} lab package directories at top level; {pp_count} ship a pyproject.toml.",
-            "domains/platform/operations/lab/",
-            r"^(silver|goblet|wikidex|after_hours_package|artifacts|bipolar-wave-demo|case|common|contract|curiosity-garden|design|goblet|hats|identify_gem_token|levant|linux|microscope|mistral-test|nome|notes|painterly|painterly-perception|python-craft|read|rust-intro|silver|storyland|token-type-calculator|tools|trace_pipeline|wikidex)$",
+        pp_count = int(
+            subprocess.run(
+                [
+                    "find",
+                    str(lab_root),
+                    "-maxdepth",
+                    "2",
+                    "-name",
+                    "pyproject.toml",
+                ],
+                capture_output=True,
+                text=True,
+            )
+            .stdout.strip()
+            .count("\n")
+            + 1
         )
-    )
+        facts.append(
+            fact(
+                "lab_packages_count",
+                f"{n_dirs} lab package directories at top level; {pp_count} ship a pyproject.toml.",
+                "domains/platform/operations/lab/",
+                r"^(silver|goblet|wikidex|after_hours_package|artifacts|bipolar-wave-demo|case|common|contract|curiosity-garden|design|goblet|hats|identify_gem_token|levant|linux|microscope|mistral-test|nome|notes|painterly|painterly-perception|python-craft|read|rust-intro|silver|storyland|token-type-calculator|tools|trace_pipeline|wikidex)$",
+            )
+        )
 
     # --- Fact 7: python-craft collaborator ---
     f = first(
