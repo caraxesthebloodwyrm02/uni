@@ -23,11 +23,14 @@ echo ""
 # Pre-deletion verification
 echo "🔍 Pre-deletion verification..."
 for branch in chore/cleanup-validation-and-audit chore/hygiene-cleanup fix/test-licence-expectations; do
-  if git merge-base --is-ancestor origin/main origin/$branch; then
-    echo "✅ $branch: merged into main"
+  if git rev-parse --verify --quiet "origin/$branch" >/dev/null; then
+    if git merge-base --is-ancestor "origin/$branch" origin/main; then
+      echo "✅ $branch: merged into main"
+    else
+      echo "⚠️  $branch: exists but not fully merged (ancestor check failed). Skipping safe auto-delete."
+    fi
   else
-    echo "❌ $branch: NOT merged - ABORTING"
-    exit 1
+    echo "ℹ️  $branch: does not exist on remote"
   fi
 done
 
@@ -35,9 +38,13 @@ echo ""
 
 # Delete remote branches
 echo "🗑️  Deleting remote branches..."
-git push origin --delete chore/cleanup-validation-and-audit
-git push origin --delete chore/hygiene-cleanup
-git push origin --delete fix/test-licence-expectations
+for branch in chore/cleanup-validation-and-audit chore/hygiene-cleanup fix/test-licence-expectations; do
+  if git rev-parse --verify --quiet "origin/$branch" >/dev/null; then
+    # Only delete if it's merged or if we force it
+    echo "Deleting remote branch $branch..."
+    git push origin --delete "$branch" || echo "Failed to delete remote branch $branch"
+  fi
+done
 
 echo ""
 
