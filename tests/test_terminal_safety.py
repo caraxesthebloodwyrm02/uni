@@ -188,11 +188,9 @@ class TestShellSpecialCharacterHandling:
     """Test handling of shell special characters."""
 
     def test_forbidden_domains_regex_safe(self):
-        """Regex for forbidden domains should not be vulnerable."""
-        from mangrove_platform.apparat.sisa import PHASE_DEFINITIONS
-
-        # Indirect test - PHASE_DEFINITIONS should load without error
-        assert len(PHASE_DEFINITIONS) > 0
+        """Apparat subsystem removed — phase definitions no longer exist."""
+        import pytest
+        pytest.skip("apparat subsystem decommissioned")
 
     def test_secret_patterns_regex_safe(self):
         """Regex for secret detection should not cause DoS."""
