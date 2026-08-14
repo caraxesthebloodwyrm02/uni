@@ -31,7 +31,12 @@ EXCLUDE_DIRS = {
     "__pycache__",
 }
 # Additional file to ignore per original bash lib
-EXCLUDE_FILES = {"mangrove_platform/apparat/phase_handlers.py", "scripts/validate_workspace.py"}
+EXCLUDE_FILES = {"scripts/validate_workspace.py"}
+# phase_handlers.py materializes CLAUDE.md's own governance text (which quotes
+# the forbidden domains as documentation, not a violation) into generated
+# compliance artifacts. Narrowly allowlist it for that one check only, rather
+# than exempting the whole file from secret/forbidden-token/size scanning too.
+FORBIDDEN_DOMAIN_ALLOWLIST = {"mangrove_platform/apparat/phase_handlers.py"}
 PATTERN_CHECK_ALLOWLIST = {"tests/test_regex_validation.py", "tests/test_terminal_safety.py"}
 
 
@@ -127,7 +132,7 @@ def check_files(root: Path) -> tuple[int, int]:
         if filepath.suffix in (".py", ".toml", ".yaml", ".yml", ".json"):
             try:
                 content = filepath.read_text(encoding="utf-8", errors="ignore")
-                if FORBIDDEN_DOMAINS.search(content):
+                if rel_path not in FORBIDDEN_DOMAIN_ALLOWLIST and FORBIDDEN_DOMAINS.search(content):
                     forbidden_domain_files.append(rel_path)
                 if FORBIDDEN_TOKENS.search(content):
                     forbidden_token_files.append(rel_path)

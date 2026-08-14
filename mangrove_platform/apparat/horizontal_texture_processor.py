@@ -234,17 +234,18 @@ class HorizontalTextureProcessor:
                 key = param_keys[i] if i < len(param_keys) else f"arg_{i}"
                 raw_params[key] = val
 
+        # High-Accuracy Check: Ensure no unexpected parameters were provided.
+        # Kept outside the try below: ApparatValidationError now subclasses
+        # ValueError, so raising it inside that block would be re-caught and
+        # double-wrapped by the same except clause.
+        signature = get_phase_signature(name)
+        if signature is not None and len(raw_params) > len(signature):
+            unexpected = set(raw_params.keys()) - set(signature.keys())
+            raise ApparatValidationError(f"Unexpected parameters for phase '{name}': {unexpected}")
+
         # 2. Validate and cast against the phase signature
         try:
             params = self._validate_and_cast_params(name, raw_params)
-
-            # High-Accuracy Check: Ensure no unexpected parameters were provided
-            signature = get_phase_signature(name)
-            if signature is not None and len(raw_params) > len(signature):
-                unexpected = set(raw_params.keys()) - set(signature.keys())
-                raise ApparatValidationError(
-                    f"Unexpected parameters for phase '{name}': {unexpected}"
-                )
         except (ValueError, TypeError) as e:
             raise ApparatValidationError(f"Parameter validation error for phase {name}: {e}") from e
 
