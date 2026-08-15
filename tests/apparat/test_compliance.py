@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """Tests for compliance artifact generation and file system operations."""
 
-import os
-import sys
 import tempfile
 from pathlib import Path
 

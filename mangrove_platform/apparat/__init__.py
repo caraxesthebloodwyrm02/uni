@@ -1,7 +1,11 @@
 """
-Apparat Subsystem
+Apparat Subsystem (Mangrove Ecosystem)
 
-A high-accuracy, type-safe dynamic phase-handler registry for grid-cell processing.
+The foundational governance engine and granular texture-orchestration apparatus
+for the Mangrove platform. True to its lexical origins as a central administrative
+machinery, Apparat provides a deterministic, type-safe state machine that coordinates,
+transforms, and renders multi-dimensional grid matrices (GridCell) through disciplined,
+sequential execution phases.
 """
 
 from .api import ApparatValidationError, GridCell, InputProcessOutput, Phase

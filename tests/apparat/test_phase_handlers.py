@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """Tests for phase_handlers.py - core business logic for Apparat phases."""
 
-import os
-import sys
 import tempfile
 from pathlib import Path
 

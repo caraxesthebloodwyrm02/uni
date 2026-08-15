@@ -149,8 +149,6 @@ def test_golding_validation_contract_execution():
 
 def test_package_exports_surface():
     """Verify package __all__ surfaces strictly export existent modules."""
-    import sys
-    print("SYS PATH IN TEST:", sys.path)
     import mangrove_platform
     import mangrove_platform.mcp as mcp_pkg
 

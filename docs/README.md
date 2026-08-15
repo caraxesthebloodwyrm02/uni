@@ -31,16 +31,16 @@ the canonical archive volume at `/home/irfankabir/` (UUID
 `cf656878-be07-4249-b8ba-10fd482aa610`), which is currently unmounted from
 this session. The live tree holds:
 
-- `mangrove_platform/apparat/` — the only substantial live code
-  (phase-handler registry, SISA bootstrap, dispatcher, golding validator).
-- `mangrove_platform/mcp/` — FastMCP server exposing Apparat as 6 tools, with a
-  security layer (`security.py`: Pydantic validation, rate limiting, audit
-  logging).
-- `tests/` — smoke tests for the `CLAUDE.md` contract and Apparat dispatch
-  tests.
-- `scripts/` — `validate_workspace.py` (structure, secrets, forbidden
-  patterns, large-file checks), `build_factbook.py`, and branch-audit
-  tooling (`prune-stale-branches.sh`).
+- `mangrove_platform/apparat/` — the foundational governance engine and granular
+  texture-orchestration apparatus (phase-handler registry, SISA bootstrap, dispatcher,
+  golding validator, spatial matrix transformations).
+- `mangrove_platform/mcp/` — native MCPServer exposing Apparat tools over Model
+  Context Protocol, with a robust security layer (`security.py`: Pydantic validation,
+  exponential backoff rate limiting, structured audit logging, hook whitelists).
+- `tests/` — comprehensive test suite (480+ items) covering Apparat dispatch,
+  aesthetics, MCP audit logging, safety annotations, and workspace invariants.
+- `scripts/` — `validate_workspace.py` (structure, secrets, forbidden patterns,
+  large-file checks), `build_factbook.py`, and branch-audit tooling.
 - `.compliance-hand-off/` — deferred-compliance sidecar (see above).
 
 For a live snapshot of every directory under the live tree, see the **Directory
