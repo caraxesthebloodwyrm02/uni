@@ -19,9 +19,14 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
+    "fastmcp>=2.14.1",
     "mcp>=2.0.0,<3",
     "pydantic>=2.0,<3",
+    "pydantic-settings>=2.15.0",
 ]
+
+[project.scripts]
+sisa = "mangrove_platform.apparat.sisa:main"
 
 [dependency-groups]
 dev = [
@@ -35,7 +40,7 @@ packages = ["mangrove_platform"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["mangrove_platform", "."]
+pythonpath = ["."]
 addopts = ["--strict-markers", "-p", "no:anyio", "-p", "no:cacheprovider"]
 
 [tool.coverage.run]

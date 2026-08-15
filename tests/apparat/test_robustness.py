@@ -8,8 +8,8 @@ from mangrove_platform.apparat.horizontal_texture_processor import HorizontalTex
 def test_invalid_syntax():
     """Test that phase strings failing the regex raise ApparatValidationError."""
     processor = HorizontalTextureProcessor(10, 10)
-    # These specifically target the regex ^([a-zA-Z0-9_]+)(?::(.*))?$
-    invalid_phases = ["!!!", ":arg1", " phase:arg1", "phase name:arg1"]
+    # These target the shared PHASE_STEP_PATTERN from phase_validation.
+    invalid_phases = ["!!!", ":arg1", " phase:arg1", "phase name:arg1", "phase:arg1 arg2"]
     for phase in invalid_phases:
         with pytest.raises(ApparatValidationError, match="Invalid phase syntax"):
             processor.process_phase(phase)
@@ -18,7 +18,7 @@ def test_invalid_syntax():
 def test_registry_misses():
     """Test that phase names not in PHASE_REGISTRY raise ApparatValidationError."""
     processor = HorizontalTextureProcessor(10, 10)
-    for phase in ("non_existent_phase", "phase:arg1 arg2", "123:arg"):
+    for phase in ("non_existent_phase", "nonexistent_phase:arg1", "123:arg"):
         with pytest.raises(ApparatValidationError, match="not found in registry"):
             processor.process_phase(phase)
 

@@ -4,15 +4,14 @@ This directory captures the compliance-baseline strategy in deferred state.
 
 ## Status
 
-**Phase execution deferred by operator, 2026-07-31.**
+**Phase execution materialised, concluding deferral (2026-08-04).**
 
-- `compliance_baseline` phase is **registered** in `platform/apparat/sisa.py`
+- `compliance_baseline` phase is **registered** in `mangrove_platform/apparat/sisa.py`
   (PHASE_DEFINITIONS).
-- The handler `compliance_baseline_handler` in `platform/apparat/phase_handlers.py`
-  is **not invoked** — no LICENSE, NOTICE, or TERMS_OF_ENGAGEMENT.md has been
+- The handler `compliance_baseline_handler` in `mangrove_platform/apparat/phase_handlers.py`
+  was **invoked** — LICENSE, NOTICE, and TERMS_OF_ENGAGEMENT.md have been
   written to the live tree.
-- This deferral is reversible: invoking the phase materialises the trio at the
-  apparat parent root (default: `/home/cable/series/mangrove/`).
+- The baseline is now active in the live repository.
 
 ## Why deferred
 

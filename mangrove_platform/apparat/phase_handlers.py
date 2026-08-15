@@ -220,11 +220,8 @@ def _digest(text: str) -> str:
 def initiate_handler(processor: IProcessor, params: PhaseParams) -> list[GridCell]:
     """Initiate processing: create an empty grid based on resolution."""
     _ = params  # Satisfy type checker - params unused in this handler
-    cells: list[GridCell] = []
-    for y in range(processor.resolution[1]):
-        for x in range(processor.resolution[0]):
-            cell = GridCell(x, y, 0.0, "empty")
-            cells.append(cell)
+    width, height = processor.resolution
+    cells = [GridCell(x, y, 0.0, "empty") for y in range(height) for x in range(width)]
     processor.ipo.input_data = cells
     return cells
 
@@ -245,14 +242,14 @@ def quantize_handler(processor: IProcessor, params: PhaseParams) -> list[GridCel
 def combine_handler(processor: IProcessor, params: PhaseParams) -> list[GridCell]:
     """Combine texture patterns using the repetition generator."""
     _ = params  # Satisfy type checker - params unused in this handler
-    combinations: list[list[str]] = processor.generator.generate(2)
+    combinations = ["-".join(c) for c in processor.generator.generate(2)]
     if not processor.ipo.input_data:
         return []
-    combined: list[GridCell] = []
-    for i, cell in enumerate(processor.ipo.input_data):
-        pattern_idx = i % len(combinations)
-        texture = "-".join(combinations[pattern_idx])
-        combined.append(GridCell(cell.x, cell.y, cell.value, texture))
+    n_combinations = len(combinations)
+    combined = [
+        GridCell(cell.x, cell.y, cell.value, combinations[i % n_combinations])
+        for i, cell in enumerate(processor.ipo.input_data)
+    ]
     processor.ipo.input_data = combined
     return combined
 

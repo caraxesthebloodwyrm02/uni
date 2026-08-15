@@ -17,8 +17,16 @@ jobs:
         with:
           version: "latest"
 
-      - name: Validate workspace structure
-        run: bash scripts/validate-workspace.sh
+      - name: Set up Python
+        uses: actions/setup-python@v5.2.0
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: uv sync --group dev
+
+      - name: Validate workspace (structure, secrets, forbidden patterns, large files)
+        run: uv run python scripts/validate_workspace.py
 
   security-scan:
     runs-on: ubuntu-latest
@@ -42,11 +50,8 @@ jobs:
       - name: Security lint check
         run: uv run ruff check --select S
 
-      - name: Check for secrets in code files
-        run: bash scripts/check-secrets.sh
-
-      - name: Check for forbidden patterns
-        run: bash scripts/check-forbidden-patterns.sh
+      - name: Validate workspace (structure, secrets, forbidden patterns, large files)
+        run: uv run python scripts/validate_workspace.py
 
   quality:
     runs-on: ubuntu-latest

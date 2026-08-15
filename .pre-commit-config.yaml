@@ -5,12 +5,11 @@ repos:
   # General pre-commit hooks
   - repo: local
     hooks:
-      - id: forbidden-domains
-        name: Check for forbidden domains (3PAA-SHADOW)
-        entry: bash scripts/check-forbidden-patterns.sh
+      - id: validate-workspace
+        name: Validate workspace (3PAA-SHADOW, secrets, size)
+        entry: uv run python scripts/validate_workspace.py
         language: system
         pass_filenames: false
-        files: \.(py|toml|yaml|yml|json)$
 
       - id: trailing-whitespace
         name: Trim trailing whitespace
@@ -53,21 +52,9 @@ repos:
         types: [python]
         pass_filenames: true
 
-      - id: check-added-large-files
-        name: Check for large files
-        entry: bash scripts/check-large-files.sh
-        language: system
-        pass_filenames: false
 
-  # Security hooks
-  - repo: local
-    hooks:
-      - id: check-secrets
-        name: Check for potential secrets
-        entry: bash scripts/check-secrets.sh
-        language: system
-        pass_filenames: false
-        files: \.(py|toml|yaml|yml|json)$
+
+
 
 # Global settings
 default_language_version:

@@ -2,11 +2,13 @@
 import os
 from typing import Any
 
+from mangrove_platform.apparat.api import ApparatValidationError
 from mangrove_platform.apparat.apparat import (
     PHASE_REGISTRY,
     register_phase_handler,
 )
 from mangrove_platform.apparat.horizontal_texture_processor import HorizontalTextureProcessor
+from mangrove_platform.apparat.phase_validation import validate_pipeline
 from mangrove_platform.apparat.sisa import sisa, to_jsonable
 from mangrove_platform.mcp.constraints_engine import ConstraintsEngine
 
@@ -101,6 +103,11 @@ def run_apparat_pipeline(pipeline_spec: str, width: int = 4, height: int = 4) ->
     Executes a sequence of Apparat phases.
     Format: 'phase1/phase2:arg1,arg2/phase3'
     """
+    try:
+        validate_pipeline(pipeline_spec)
+    except ApparatValidationError as e:
+        return {"status": "error", "error": str(e)}
+
     phases = [p for p in pipeline_spec.split("/") if p]
     if not phases:
         return {"status": "error", "error": "Empty pipeline specification"}
@@ -150,6 +157,94 @@ def search_constraints(query: str | None = None) -> list[dict[str, Any]]:
     return constraints_engine.search(query)
 
 
+def reset_apparat_processor(width: int = 4, height: int = 4) -> dict[str, Any]:
+    """Resets the global processor instance to a fresh state with the given dimensions."""
+    global _GLOBAL_PROCESSOR
+    _GLOBAL_PROCESSOR = HorizontalTextureProcessor(width, height)
+    return {
+        "status": "success",
+        "message": f"Processor reset to {width}x{height} canvas",
+        "resolution": [width, height],
+        "cell_count": len(_GLOBAL_PROCESSOR.ipo.input_data),
+    }
+
+
+def render_apparat_matrix(width: int = 4, height: int = 4) -> dict[str, Any]:
+    """Renders the current spatial grid state as formatted row matrices and visual string."""
+    processor = get_processor(width, height)
+    cells = processor.ipo.input_data
+    if not cells:
+        return {
+            "status": "empty",
+            "resolution": list(processor.resolution),
+            "matrix": [],
+            "visualization": "Empty canvas (0 cells)",
+            "total_cells": 0,
+        }
+
+    matrix_rows = []
+    vis_lines = []
+    grid_map = {(c.x, c.y): c for c in cells}
+    w, h = processor.resolution
+
+    for y in range(h):
+        row = []
+        row_strs = []
+        for x in range(w):
+            cell = grid_map.get((x, y))
+            if cell:
+                row.append(
+                    {
+                        "x": x,
+                        "y": y,
+                        "value": round(cell.value, 4),
+                        "texture": cell.texture_type,
+                    }
+                )
+                row_strs.append(f"[{cell.value:.2f}|{cell.texture_type}]")
+            else:
+                row.append({"x": x, "y": y, "value": 0.0, "texture": "none"})
+                row_strs.append("[0.00|none]")
+        matrix_rows.append(row)
+        vis_lines.append(f"Row {y}: " + " ".join(row_strs))
+
+    return {
+        "status": "success",
+        "resolution": list(processor.resolution),
+        "matrix": matrix_rows,
+        "visualization": "\n".join(vis_lines),
+        "total_cells": len(cells),
+    }
+
+
+def get_phase_signature_info(phase: str) -> dict[str, Any]:
+    """Inspects registration metadata, signatures, and documentation for a specific phase."""
+    from mangrove_platform.apparat.apparat import (
+        get_phase_handler,
+        get_phase_param_map,
+        get_phase_signature,
+    )
+
+    handler = get_phase_handler(phase)
+    if not handler:
+        return {"status": "error", "error": f"Phase '{phase}' is not registered in Apparat."}
+
+    signature = get_phase_signature(phase)
+    param_map = get_phase_param_map(phase)
+    sig_serialized = (
+        {k: getattr(v, "__name__", str(v)) for k, v in signature.items()} if signature else {}
+    )
+    doc = handler.__doc__.strip() if handler.__doc__ else "No docstring provided."
+
+    return {
+        "status": "success",
+        "phase": phase,
+        "signature": sig_serialized,
+        "param_map": param_map or [],
+        "description": doc,
+    }
+
+
 def is_approved_hook(handler_name: str) -> bool:
     """
     Validates if a given handler name is in the whitelist of approved Apparat hooks.
@@ -163,6 +258,88 @@ def is_approved_hook(handler_name: str) -> bool:
         "_post_complete",
     }
     return handler_name in approved_hooks
+
+
+def get_gemini_tool_declarations() -> list[dict[str, Any]]:
+    """Returns Gemini Interactions / Live API function declarations for Apparat."""
+    return [
+        {
+            "function_declarations": [
+                {
+                    "name": "list_apparat_phases",
+                    "description": "Lists all registered phase handlers in Mangrove Apparat.",
+                    "parameters": {"type": "OBJECT", "properties": {}},
+                },
+                {
+                    "name": "run_apparat_phase",
+                    "description": "Executes a single processing phase in the Apparat pipeline.",
+                    "parameters": {
+                        "type": "OBJECT",
+                        "properties": {
+                            "phase": {
+                                "type": "STRING",
+                                "description": "Phase identifier (e.g. initiate, normalize, scale:2.0)",
+                            },
+                            "width": {"type": "INTEGER", "description": "Grid width", "default": 4},
+                            "height": {
+                                "type": "INTEGER",
+                                "description": "Grid height",
+                                "default": 4,
+                            },
+                        },
+                        "required": ["phase"],
+                    },
+                },
+                {
+                    "name": "run_apparat_pipeline",
+                    "description": "Executes a sequence of Apparat phases separated by slashes.",
+                    "parameters": {
+                        "type": "OBJECT",
+                        "properties": {
+                            "pipeline": {
+                                "type": "STRING",
+                                "description": "Pipeline specification (e.g. 'initiate/scale:2.0/complete')",
+                            },
+                            "width": {"type": "INTEGER", "description": "Grid width", "default": 4},
+                            "height": {
+                                "type": "INTEGER",
+                                "description": "Grid height",
+                                "default": 4,
+                            },
+                        },
+                        "required": ["pipeline"],
+                    },
+                },
+                {
+                    "name": "check_apparat_health",
+                    "description": "Performs a full SISA bootstrap check of the Apparat subsystem.",
+                    "parameters": {"type": "OBJECT", "properties": {}},
+                },
+            ]
+        }
+    ]
+
+
+def dispatch_gemini_tool_call(tool_name: str, args: dict[str, Any]) -> dict[str, Any]:
+    """Dispatches a Gemini function tool call to the corresponding Apparat handler."""
+    if tool_name == "list_apparat_phases":
+        return {"phases": list_apparat_phases()}
+    elif tool_name == "run_apparat_phase":
+        return run_apparat_phase(
+            phase=args.get("phase", ""),
+            width=int(args.get("width", 4)),
+            height=int(args.get("height", 4)),
+        )
+    elif tool_name == "run_apparat_pipeline":
+        return run_apparat_pipeline(
+            pipeline_spec=args.get("pipeline", ""),
+            width=int(args.get("width", 4)),
+            height=int(args.get("height", 4)),
+        )
+    elif tool_name == "check_apparat_health":
+        return check_apparat_health()
+    else:
+        return {"status": "error", "error": f"Unknown tool: {tool_name}"}
 
 
 # Run initialization on module load

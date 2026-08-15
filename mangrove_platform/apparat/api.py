@@ -7,8 +7,13 @@ from typing import Any, Protocol, runtime_checkable
 # --- Base Types ---
 
 
-class ApparatValidationError(Exception):
-    """Exception raised when phase parameter validation fails."""
+class ApparatValidationError(ValueError):
+    """Exception raised when phase parameter validation fails.
+
+    Subclasses ``ValueError`` so Pydantic field validators (MCP gate) convert
+    it into a structured ``ValidationError`` while the Apparat dispatcher can
+    still catch it by its domain type.
+    """
 
     pass
 
@@ -40,7 +45,7 @@ class Phase(Enum):
     VALIDATE_ACCELERATION = "validate_acceleration"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class GridCell:
     """
     Single grid cell for block processing.
@@ -55,6 +60,24 @@ class GridCell:
     def read(self) -> float:
         """Read cell value - complete by read."""
         return self.value
+
+
+class BaselineNormalizer:
+    """
+    Centralized implementation of the Golding Baseline Normalization formula.
+    Formula: normalized_value = 100 * (1 / (1 + (10 / (interval + ε))))
+    """
+
+    EPSILON = 1e-6
+
+    @classmethod
+    def normalize(cls, value: float) -> float:
+        """
+        Normalizes a raw interval/value to the [0, 100] range.
+        """
+        val = abs(float(value))
+        normalized = 100 * (1 / (1 + (10 / (val + cls.EPSILON))))
+        return max(0.0, min(100.0, normalized))
 
 
 @dataclass

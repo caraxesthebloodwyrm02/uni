@@ -37,20 +37,20 @@ unset VIRTUAL_ENV && uv run ruff format .
 ## Workspace Maintenance
 
 ```bash
-bash scripts/audit_workspace.sh          # counts empty dirs / confirms .gitkeep coverage
-bash scripts/validate-workspace.sh       # structure + forbidden-patterns + secrets (shared validate-lib.sh)
-bash scripts/check-forbidden-patterns.sh # 3PAA-SHADOW / SUSS / WorkOS / Factory sweep
-bash scripts/check-secrets.sh            # secret-pattern scan
-bash scripts/check-large-files.sh        # 60 MB corpus-index.tsv guardrail
+uv run python scripts/audit_workspace.py  (WIP: stub not yet implemented)  # counts empty dirs / confirms .gitkeep coverage
+uv run python scripts/validate_workspace.py  # structure + forbidden-patterns + secrets
+uv run python scripts/check_forbidden_patterns.py  (WIP: stub not yet implemented)  # 3PAA-SHADOW / SUSS / WorkOS / Factory sweep
+uv run python scripts/check_secrets.py  (WIP: stub not yet implemented)  # secret-pattern scan
+uv run python scripts/check_large_files.py  (WIP: stub not yet implemented)  # 60 MB corpus-index.tsv guardrail
 ```
 
 ## MCP Server
 
-Server: `mangrove_platform/mcp/apparat_server.py` (FastMCP, 6 tools). Security
+Server: `mangrove_platform/mcp/apparat_server.py` (Native `MCPServer`, 10 tools). Security
 layer: `mangrove_platform/mcp/security.py` — Pydantic input validation, a
-fixed-window per-tool rate limiter (100 calls/60s), and structured audit
+fixed-window per-tool rate limiter with full-jitter exponential backoff, and structured audit
 logging. Every tool invocation passes `_gate()` (rate limit then validate), and
-state-mutating tools (`run_apparat_phase`, `run_apparat_pipeline`) log
+state-mutating tools (`run_apparat_phase`, `run_apparat_pipeline`, `register_apparat_hook`, `reset_apparat_processor`) log
 invocations with status.
 
 | Tool | readOnly | destructive | idempotent | openWorld |
@@ -60,10 +60,16 @@ invocations with status.
 | `list_apparat_phases` | True | False | True | False |
 | `run_apparat_phase` | False | False | True | False |
 | `run_apparat_pipeline` | False | False | True | False |
+| `register_apparat_hook` | False | False | False | False |
+| `list_apparat_hooks` | True | False | True | False |
 | `search_constraints` | True | False | True | False |
+| `render_apparat_matrix` | True | False | True | False |
+| `get_phase_signature` | True | False | True | False |
+| `reset_apparat_processor` | False | True | True | False |
 
 Phase names are whitelisted (13 canonical phases in `security.py::ALLOWED_PHASES`);
-positional args like `scale:2.0` are allowed via the suffix pattern.
+positional args like `scale:2.0` are allowed via the suffix pattern. Hook registration
+is bounded by an explicit whitelist (`is_approved_hook`) to prevent unauthorized execution.
 
 ## Apparat
 

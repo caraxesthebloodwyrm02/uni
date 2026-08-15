@@ -1,9 +1,11 @@
 import logging
 
-from mcp.server.fastmcp import FastMCP  # type: ignore
-
 from mangrove_platform.mcp import apparat_logic
 from mangrove_platform.mcp.security import (
+    ConstraintSearchRequest,
+    GridRequest,
+    HookRegistrationRequest,
+    PhaseInspectionRequest,
     PhaseRequest,
     PipelineRequest,
     _ErrorResult,
@@ -14,13 +16,22 @@ from mangrove_platform.mcp.security import (
     validate_request,
 )
 
-# Configure root logger so security.log_tool_invocation's INFO entries
-# reach the MCP transport's stderr sink (without this, the audit log is
-# silently swallowed on a fresh interpreter).
+# Configure root logger
 logging.basicConfig(level=logging.INFO)
 
-# Create the MCP server
-mcp = FastMCP("Apparat-Server")
+try:
+    from mcp.server.mcpserver import MCPServer
+
+    mcp = MCPServer("Apparat-Server")
+except Exception:
+    try:
+        from fastmcp import FastMCP  # type: ignore
+
+        mcp = FastMCP("Apparat-Server")
+    except Exception:
+        from mcp.server.fastmcp import FastMCP  # type: ignore
+
+        mcp = FastMCP("Apparat-Server")
 
 # Default grid resolution used by tools that don't take width/height params
 # (e.g. list_apparat_hooks, register_apparat_hook). Must match the GridRequest
@@ -82,8 +93,6 @@ def get_apparat_state(width: int = 4, height: int = 4):
         width: Grid width (1-100).
         height: Grid height (1-100).
     """
-    from .security import GridRequest
-
     params = {"width": width, "height": height}
     validated = validate_request(GridRequest, params)
     if isinstance(validated, _ErrorResult):
@@ -179,8 +188,6 @@ def register_apparat_hook(hook_type: str, handler_name: str, phase: str | None =
         handler_name: Name of the handler function.
         phase: Optional phase name to bind the hook to.
     """
-    from .security import HookRegistrationRequest
-
     params = {"hook_type": hook_type, "handler_name": handler_name, "phase": phase}
     validated = _gate("register_apparat_hook", HookRegistrationRequest, params)
     if validated.get("status") == "error":
@@ -188,12 +195,8 @@ def register_apparat_hook(hook_type: str, handler_name: str, phase: str | None =
 
     processor = apparat_logic.get_processor(*_DEFAULT_GRID_DIMS)
 
-    # For the MCP stub, we resolve the handler from the processor's
-    # internal logic or a predefined set of management la-hooks.
-    # In a full version, we would look up the handler in a specialized HookRegistry.
-
-    # Defensive implementation: we only allow registration of la-hooks
-    # that are actually definedS in the approved hook whitelist.
+    # Defensive implementation: we only allow registration of hooks
+    # that are actually defined in the approved hook whitelist.
     if not apparat_logic.is_approved_hook(handler_name):
         log_tool_invocation(
             "register_apparat_hook",
@@ -239,6 +242,97 @@ def list_apparat_hooks():
         "global_pre": [h.__name__ for h in processor.global_pre_hooks],
         "global_post": [h.__name__ for h in processor.global_post_hooks],
     }
+
+
+@mcp.tool(
+    annotations=safety_annotations(
+        read_only=True, destructive=False, idempotent=True, open_world=False
+    )
+)
+def search_constraints(query: str | None = None):
+    """
+    Searches for systemic constraints, validation rules, regex patterns,
+    and operational limits embedded across the Mangrove codebase.
+
+    Args:
+        query: Optional search term or regex filter.
+    """
+    params = {"query": query}
+    validated = _gate("search_constraints", ConstraintSearchRequest, params)
+    if validated.get("status") == "error":
+        return validated
+    result = apparat_logic.search_constraints(validated.get("query"))
+    log_tool_invocation("search_constraints", validated, "success")
+    return {"status": "success", "count": len(result), "constraints": result}
+
+
+@mcp.tool(
+    annotations=safety_annotations(
+        read_only=True, destructive=False, idempotent=True, open_world=False
+    )
+)
+def render_apparat_matrix(width: int = 4, height: int = 4):
+    """
+    Renders the current spatial grid state as formatted 2D row matrices and ASCII textures.
+
+    Args:
+        width: Grid width (1-100).
+        height: Grid height (1-100).
+    """
+    params = {"width": width, "height": height}
+    validated = validate_request(GridRequest, params)
+    if isinstance(validated, _ErrorResult):
+        log_tool_invocation(
+            "render_apparat_matrix", params, "validation_failed", detail=validated.error
+        )
+        return {"status": "error", "error": validated.error}
+    result = apparat_logic.render_apparat_matrix(validated["width"], validated["height"])
+    log_tool_invocation("render_apparat_matrix", validated, "success")
+    return result
+
+
+@mcp.tool(
+    annotations=safety_annotations(
+        read_only=True, destructive=False, idempotent=True, open_world=False
+    )
+)
+def get_phase_signature(phase: str):
+    """
+    Inspects registration metadata, parameter types, positional mapping,
+    and docstrings for a specific registered Apparat phase handler.
+
+    Args:
+        phase: Phase identifier (e.g., 'scale', 'clamp', 'highlight').
+    """
+    params = {"phase": phase}
+    validated = _gate("get_phase_signature", PhaseInspectionRequest, params)
+    if validated.get("status") == "error":
+        return validated
+    result = apparat_logic.get_phase_signature_info(validated["phase"])
+    log_tool_invocation("get_phase_signature", validated, result.get("status", "unknown"))
+    return result
+
+
+@mcp.tool(
+    annotations=safety_annotations(
+        read_only=False, destructive=True, idempotent=True, open_world=False
+    )
+)
+def reset_apparat_processor(width: int = 4, height: int = 4):
+    """
+    Resets the global Apparat processor canvas to an empty initial state with the specified dimensions.
+
+    Args:
+        width: Grid width (1-100).
+        height: Grid height (1-100).
+    """
+    params = {"width": width, "height": height}
+    validated = _gate("reset_apparat_processor", GridRequest, params)
+    if validated.get("status") == "error":
+        return validated
+    result = apparat_logic.reset_apparat_processor(validated["width"], validated["height"])
+    log_tool_invocation("reset_apparat_processor", validated, "success")
+    return result
 
 
 if __name__ == "__main__":
