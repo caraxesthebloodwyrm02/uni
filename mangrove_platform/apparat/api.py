@@ -62,6 +62,24 @@ class GridCell:
         return self.value
 
 
+class BaselineNormalizer:
+    """
+    Centralized implementation of the Golding Baseline Normalization formula.
+    Formula: normalized_value = 100 * (1 / (1 + (10 / (interval + ε))))
+    """
+
+    EPSILON = 1e-6
+
+    @classmethod
+    def normalize(cls, value: float) -> float:
+        """
+        Normalizes a raw interval/value to the [0, 100] range.
+        """
+        val = abs(float(value))
+        normalized = 100 * (1 / (1 + (10 / (val + cls.EPSILON))))
+        return max(0.0, min(100.0, normalized))
+
+
 @dataclass
 class InputProcessOutput:
     """

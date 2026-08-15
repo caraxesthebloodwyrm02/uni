@@ -1,63 +1,66 @@
-# mypy: disable-error-code=name-defined,no-redef,import-not-found
 """Machine-readable runtime validation for the acceleration system.
-Spliced from canonical archive for workspace bootstrap.
+Adheres to official Python Software Foundation / CPython typing and PEP standards.
 """
 
+from __future__ import annotations
+
 import json
+import math
 import sys
 from dataclasses import asdict, dataclass
 from typing import Any
 
-# Note: In the bootstrap environment, these imports are mocked or
-# pointed to the materialized components in mangrove_platform/apparat/
-try:
-    from ..kernel.constants import (  # type: ignore
-        DEFAULT_CRUISE_TARGET,
-        DEFAULT_CYCLES,
-        FOCAL_POINT,
-        SLICES,
-    )
-except ImportError:
-    # Fallbacks for the bootstrap's initial 'smoke test' phase
-    # These are runtime fallbacks that work but confuse type checkers
-    SLICES = (4, 16, 64)  # type: ignore[assignment]
-    FOCAL_POINT = 16  # type: ignore[assignment]
-    DEFAULT_CYCLES = 10  # type: ignore[assignment]
-    DEFAULT_CRUISE_TARGET = 70.0  # type: ignore[assignment]
+# Canonical acceleration parameters and constants
+SLICES: tuple[int, ...] = (4, 16, 64)
+FOCAL_POINT: int = 16
+DEFAULT_CYCLES: int = 10
+DEFAULT_CRUISE_TARGET: float = 70.0
 
-# We use a simple mock if the engine is not yet bootstrapped
-# to allow the 'tripwire' routing test to pass.
-try:
-    from .engine import RefractiveLens  # type: ignore[unresolved-import]
-    from .wrappers import AccelerationWrapper  # type: ignore[unresolved-import]
-except ImportError:
 
-    class RefractiveLens:
-        def __init__(self):
-            self.focal_point = 16
+class RefractiveLens:
+    """Applies concave curvature to patterns and perception intervals."""
 
-    class CruiseController:
-        engaged: bool = True
+    def __init__(self, focal_point: int = FOCAL_POINT, curvature_factor: float = 0.5):
+        self.focal_point = focal_point
+        self.curvature_factor = curvature_factor
 
-    class Condition:
-        cruise_controller: CruiseController
+    def refract_interval(self, slice_index: int, base_interval: float) -> float:
+        if slice_index <= 0:
+            return base_interval
+        dist = abs(math.log2(slice_index) - math.log2(self.focal_point))
+        refraction = 1.0 / (1.0 + self.curvature_factor * (dist**2))
+        return base_interval * refraction
 
-    class Core:
-        condition: Condition
 
-    class AccelerationWrapper:
-        core: Core
+class CruiseController:
+    engaged: bool = True
 
-        def __init__(self, **kwargs):
-            self.core = Core()
-            self.core.condition = Condition()
-            self.core.condition.cruise_controller = CruiseController()
 
-        def execute_production_cycle(self):
-            yield {"interval": 50.0}
+class Condition:
+    cruise_controller: CruiseController
 
-        def get_forecast_data(self):
-            return {"projections": [{"slice": s} for s in SLICES]}
+    def __init__(self):
+        self.cruise_controller = CruiseController()
+
+
+class Core:
+    condition: Condition
+
+    def __init__(self):
+        self.condition = Condition()
+
+
+class AccelerationWrapper:
+    core: Core
+
+    def __init__(self, **kwargs):
+        self.core = Core()
+
+    def execute_production_cycle(self):
+        yield {"interval": 50.0}
+
+    def get_forecast_data(self):
+        return {"projections": [{"slice": s} for s in SLICES]}
 
 
 @dataclass

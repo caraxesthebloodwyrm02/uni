@@ -63,23 +63,23 @@ def list_registered_phases() -> list[str]:
 
 
 def normalize_handler(processor, params):
-    """Normalize cell values to a [0, 1] range."""
+    """Normalize cell values to [0.0, 1.0] range."""
     from .api import GridCell
 
     if not processor.ipo.input_data:
         return []
+
     values = [cell.value for cell in processor.ipo.input_data]
-    min_val, max_val = min(values), max(values)
-    if min_val == max_val:
-        normalized = [
-            GridCell(cell.x, cell.y, 0.5, cell.texture_type) for cell in processor.ipo.input_data
-        ]
-    else:
-        diff = max_val - min_val
-        normalized = [
-            GridCell(cell.x, cell.y, (cell.value - min_val) / diff, cell.texture_type)
-            for cell in processor.ipo.input_data
-        ]
+    min_val = min(values)
+    max_val = max(values)
+    rng = max_val - min_val
+    if rng == 0:
+        rng = 1.0
+
+    normalized = [
+        GridCell(cell.x, cell.y, (cell.value - min_val) / rng, cell.texture_type)
+        for cell in processor.ipo.input_data
+    ]
     processor.ipo.input_data = normalized
     return normalized
 
@@ -104,7 +104,7 @@ def clamp_handler(processor, params):
     from .api import GridCell
 
     min_val = params.get("min_val", 0.0)
-    max_val = params.get("max_val", 1.0)
+    max_val = params.get("max_val", 100.0)
     if not processor.ipo.input_data:
         return []
     clamped = [
@@ -117,7 +117,7 @@ def clamp_handler(processor, params):
 
 def filter_handler(processor, params):
     """Filter cells by value threshold."""
-    threshold = params.get("threshold", 0.5)
+    threshold = params.get("threshold", 50.0)
     if not processor.ipo.input_data:
         return []
     filtered = [cell for cell in processor.ipo.input_data if cell.value >= threshold]

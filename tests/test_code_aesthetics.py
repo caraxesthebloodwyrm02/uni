@@ -114,3 +114,49 @@ def test_pipeline_validation_edge_cases():
 
     with pytest.raises(ValueError, match="Invalid pipeline syntax"):
         validate_pipeline("/initiate")
+
+
+def test_no_wildcard_imports_across_workspace():
+    """Verify that no module across mangrove_platform uses wildcard imports (PEP 8 compliance)."""
+    platform_dir = REPO_ROOT / "mangrove_platform"
+
+    for py_file in platform_dir.rglob("*.py"):
+        content = py_file.read_text(encoding="utf-8")
+        for idx, line in enumerate(content.splitlines(), start=1):
+            if "import *" in line and not line.strip().startswith("#"):
+                raise AssertionError(
+                    f"Wildcard import forbidden per PEP 8 guidelines: {py_file.name}:{idx}"
+                )
+
+
+def test_golding_validation_contract_execution():
+    """Verify restored golding validate module executes and returns clean CheckResults."""
+    import mangrove_platform.apparat.src.golding.validate as gval
+
+    norm_res = gval.check_baseline_normalization()
+    assert norm_res.passed is True
+    assert norm_res.detail["count"] == 10
+
+    cruise_res = gval.check_cruise_engagement()
+    assert cruise_res.passed is True
+    assert len(cruise_res.detail["engaged_per_cycle"]) == 10
+
+    slice_res = gval.check_slice_contract()
+    assert slice_res.passed is True
+    assert slice_res.detail["expected_slices"] == [4, 16, 64]
+    assert slice_res.detail["expected_focal_point"] == 16
+
+
+def test_package_exports_surface():
+    """Verify package __all__ surfaces strictly export existent modules."""
+    import sys
+    print("SYS PATH IN TEST:", sys.path)
+    import mangrove_platform
+    import mangrove_platform.mcp as mcp_pkg
+
+    assert mangrove_platform.__all__ == ["apparat", "mcp"]
+    for sym in mangrove_platform.__all__:
+        assert hasattr(mangrove_platform, sym)
+
+    for sym in mcp_pkg.__all__:
+        assert hasattr(mcp_pkg, sym)

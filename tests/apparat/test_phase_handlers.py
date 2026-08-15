@@ -6,8 +6,6 @@ import sys
 import tempfile
 from pathlib import Path
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../mangrove_platform"))
-
 from mangrove_platform.apparat.api import GridCell
 from mangrove_platform.apparat.horizontal_texture_processor import HorizontalTextureProcessor
 from mangrove_platform.apparat.phase_handlers import (

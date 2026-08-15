@@ -46,19 +46,17 @@ def run_command(
 
 def check_command_exists(cmd: str) -> bool:
     """
-    Check if a command exists in PATH.
+    Check if a command exists in PATH using Python standard library shutil.which.
 
     Args:
-        cmd: Command name to check
+        cmd: Command name or path to check
 
     Returns:
         True if command exists, False otherwise
     """
-    try:
-        subprocess.run(["which", cmd], capture_output=True, check=True)
-        return True
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return False
+    import shutil
+
+    return shutil.which(cmd) is not None
 
 
 def ensure_directory_exists(path: Path) -> None:

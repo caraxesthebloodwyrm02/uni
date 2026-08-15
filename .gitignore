@@ -70,3 +70,50 @@ combined_diff.txt
 # Agent tool config (per-host absolute paths)
 .claude/
 .opencode/
+
+# Privacy & Secrets Prevention
+.env
+.env.*
+secrets/
+secrets.json
+credentials.json
+credentials*.json
+client_secret*.json
+token*.json
+*.token
+*.key
+*.pem
+*.pub
+*.cert
+*.p12
+*.crt
+id_rsa*
+id_ecdsa*
+id_ed25519*
+
+# Local developer/host settings and secrets
+.ssh/
+.aws/
+.gcloud/
+.config/
+.gemini/
+
+# Agent transcripts, reviews, & trailer templates
+*.log
+*.jsonl
+transcript*.jsonl
+staged_diff*
+combined_diff*
+git_diff*
+*review_pack*
+*code_review*
+*readiness*
+*staging_readiness*
+*trailer*
+brain/
+scratch/
+
+# User & Agent Workspace Scope (local only, out of scope for team repository)
+CLAUDE.md
+AGENTS.md
+.devin/

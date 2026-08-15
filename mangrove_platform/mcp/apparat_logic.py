@@ -172,5 +172,87 @@ def is_approved_hook(handler_name: str) -> bool:
     return handler_name in approved_hooks
 
 
+def get_gemini_tool_declarations() -> list[dict[str, Any]]:
+    """Returns Gemini Interactions / Live API function declarations for Apparat."""
+    return [
+        {
+            "function_declarations": [
+                {
+                    "name": "list_apparat_phases",
+                    "description": "Lists all registered phase handlers in Mangrove Apparat.",
+                    "parameters": {"type": "OBJECT", "properties": {}},
+                },
+                {
+                    "name": "run_apparat_phase",
+                    "description": "Executes a single processing phase in the Apparat pipeline.",
+                    "parameters": {
+                        "type": "OBJECT",
+                        "properties": {
+                            "phase": {
+                                "type": "STRING",
+                                "description": "Phase identifier (e.g. initiate, normalize, scale:2.0)",
+                            },
+                            "width": {"type": "INTEGER", "description": "Grid width", "default": 4},
+                            "height": {
+                                "type": "INTEGER",
+                                "description": "Grid height",
+                                "default": 4,
+                            },
+                        },
+                        "required": ["phase"],
+                    },
+                },
+                {
+                    "name": "run_apparat_pipeline",
+                    "description": "Executes a sequence of Apparat phases separated by slashes.",
+                    "parameters": {
+                        "type": "OBJECT",
+                        "properties": {
+                            "pipeline": {
+                                "type": "STRING",
+                                "description": "Pipeline specification (e.g. 'initiate/scale:2.0/complete')",
+                            },
+                            "width": {"type": "INTEGER", "description": "Grid width", "default": 4},
+                            "height": {
+                                "type": "INTEGER",
+                                "description": "Grid height",
+                                "default": 4,
+                            },
+                        },
+                        "required": ["pipeline"],
+                    },
+                },
+                {
+                    "name": "check_apparat_health",
+                    "description": "Performs a full SISA bootstrap check of the Apparat subsystem.",
+                    "parameters": {"type": "OBJECT", "properties": {}},
+                },
+            ]
+        }
+    ]
+
+
+def dispatch_gemini_tool_call(tool_name: str, args: dict[str, Any]) -> dict[str, Any]:
+    """Dispatches a Gemini function tool call to the corresponding Apparat handler."""
+    if tool_name == "list_apparat_phases":
+        return {"phases": list_apparat_phases()}
+    elif tool_name == "run_apparat_phase":
+        return run_apparat_phase(
+            phase=args.get("phase", ""),
+            width=int(args.get("width", 4)),
+            height=int(args.get("height", 4)),
+        )
+    elif tool_name == "run_apparat_pipeline":
+        return run_apparat_pipeline(
+            pipeline_spec=args.get("pipeline", ""),
+            width=int(args.get("width", 4)),
+            height=int(args.get("height", 4)),
+        )
+    elif tool_name == "check_apparat_health":
+        return check_apparat_health()
+    else:
+        return {"status": "error", "error": f"Unknown tool: {tool_name}"}
+
+
 # Run initialization on module load
 initialize_apparat()

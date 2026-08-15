@@ -57,7 +57,28 @@ def test_mcp_api():
     assert isinstance(constraints, list), "Should return a list"
     print("[OK] Constraint search passed.")
 
-    print("\nALL MCP API TESTS PASSED")
+    # 6. Gemini Function Declarations & Tool Dispatch
+    print("\nTesting Gemini Interactions / Live API integration...")
+    decls = apparat_logic.get_gemini_tool_declarations()
+    assert len(decls) == 1, "Should provide tool declarations wrapper"
+    func_decls = decls[0]["function_declarations"]
+    tool_names = [f["name"] for f in func_decls]
+    assert "list_apparat_phases" in tool_names
+    assert "run_apparat_phase" in tool_names
+    assert "run_apparat_pipeline" in tool_names
+    assert "check_apparat_health" in tool_names
+
+    # Test tool dispatching
+    dispatched_phases = apparat_logic.dispatch_gemini_tool_call("list_apparat_phases", {})
+    assert "phases" in dispatched_phases and len(dispatched_phases["phases"]) > 0
+
+    dispatched_run = apparat_logic.dispatch_gemini_tool_call(
+        "run_apparat_phase", {"phase": "initiate", "width": 2, "height": 2}
+    )
+    assert dispatched_run.get("status") == "success"
+    print("[OK] Gemini tool declarations & dispatch passed.")
+
+    print("\nALL MCP & GEMINI API TESTS PASSED")
 
 
 if __name__ == "__main__":

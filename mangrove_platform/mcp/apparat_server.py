@@ -1,9 +1,9 @@
 import logging
 
-from mcp.server.fastmcp import FastMCP  # type: ignore
-
 from mangrove_platform.mcp import apparat_logic
 from mangrove_platform.mcp.security import (
+    GridRequest,
+    HookRegistrationRequest,
     PhaseRequest,
     PipelineRequest,
     _ErrorResult,
@@ -14,13 +14,22 @@ from mangrove_platform.mcp.security import (
     validate_request,
 )
 
-# Configure root logger so security.log_tool_invocation's INFO entries
-# reach the MCP transport's stderr sink (without this, the audit log is
-# silently swallowed on a fresh interpreter).
+# Configure root logger
 logging.basicConfig(level=logging.INFO)
 
-# Create the MCP server
-mcp = FastMCP("Apparat-Server")
+try:
+    from mcp.server.mcpserver import MCPServer
+
+    mcp = MCPServer("Apparat-Server")
+except Exception:
+    try:
+        from fastmcp import FastMCP  # type: ignore
+
+        mcp = FastMCP("Apparat-Server")
+    except Exception:
+        from mcp.server.fastmcp import FastMCP  # type: ignore
+
+        mcp = FastMCP("Apparat-Server")
 
 # Default grid resolution used by tools that don't take width/height params
 # (e.g. list_apparat_hooks, register_apparat_hook). Must match the GridRequest
@@ -82,8 +91,6 @@ def get_apparat_state(width: int = 4, height: int = 4):
         width: Grid width (1-100).
         height: Grid height (1-100).
     """
-    from .security import GridRequest
-
     params = {"width": width, "height": height}
     validated = validate_request(GridRequest, params)
     if isinstance(validated, _ErrorResult):
@@ -179,8 +186,6 @@ def register_apparat_hook(hook_type: str, handler_name: str, phase: str | None =
         handler_name: Name of the handler function.
         phase: Optional phase name to bind the hook to.
     """
-    from .security import HookRegistrationRequest
-
     params = {"hook_type": hook_type, "handler_name": handler_name, "phase": phase}
     validated = _gate("register_apparat_hook", HookRegistrationRequest, params)
     if validated.get("status") == "error":

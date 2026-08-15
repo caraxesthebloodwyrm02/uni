@@ -45,11 +45,31 @@ def test_search_constraints():
         print("[FAIL] Did not find dispatcher regex\n")
 
 
+def test_gemini_declarations():
+    print("Testing Gemini Interactions / Live API declarations & dispatcher...")
+    from mangrove_platform.mcp.apparat_logic import (
+        dispatch_gemini_tool_call,
+        get_gemini_tool_declarations,
+    )
+
+    decls = get_gemini_tool_declarations()
+    assert len(decls) == 1
+    func_decls = decls[0]["function_declarations"]
+    assert any(f["name"] == "run_apparat_phase" for f in func_decls)
+
+    res = dispatch_gemini_tool_call(
+        "run_apparat_phase", {"phase": "initiate", "width": 2, "height": 2}
+    )
+    assert res.get("status") == "success"
+    print("[OK] Gemini integration validated\n")
+
+
 if __name__ == "__main__":
     try:
         test_list_phases()
         test_run_phase()
         test_search_constraints()
+        test_gemini_declarations()
         print("All tests passed!")
     except Exception as e:
         print(f"Test failed with exception: {e}")
