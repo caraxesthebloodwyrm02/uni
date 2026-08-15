@@ -157,6 +157,94 @@ def search_constraints(query: str | None = None) -> list[dict[str, Any]]:
     return constraints_engine.search(query)
 
 
+def reset_apparat_processor(width: int = 4, height: int = 4) -> dict[str, Any]:
+    """Resets the global processor instance to a fresh state with the given dimensions."""
+    global _GLOBAL_PROCESSOR
+    _GLOBAL_PROCESSOR = HorizontalTextureProcessor(width, height)
+    return {
+        "status": "success",
+        "message": f"Processor reset to {width}x{height} canvas",
+        "resolution": [width, height],
+        "cell_count": len(_GLOBAL_PROCESSOR.ipo.input_data),
+    }
+
+
+def render_apparat_matrix(width: int = 4, height: int = 4) -> dict[str, Any]:
+    """Renders the current spatial grid state as formatted row matrices and visual string."""
+    processor = get_processor(width, height)
+    cells = processor.ipo.input_data
+    if not cells:
+        return {
+            "status": "empty",
+            "resolution": list(processor.resolution),
+            "matrix": [],
+            "visualization": "Empty canvas (0 cells)",
+            "total_cells": 0,
+        }
+
+    matrix_rows = []
+    vis_lines = []
+    grid_map = {(c.x, c.y): c for c in cells}
+    w, h = processor.resolution
+
+    for y in range(h):
+        row = []
+        row_strs = []
+        for x in range(w):
+            cell = grid_map.get((x, y))
+            if cell:
+                row.append(
+                    {
+                        "x": x,
+                        "y": y,
+                        "value": round(cell.value, 4),
+                        "texture": cell.texture_type,
+                    }
+                )
+                row_strs.append(f"[{cell.value:.2f}|{cell.texture_type}]")
+            else:
+                row.append({"x": x, "y": y, "value": 0.0, "texture": "none"})
+                row_strs.append("[0.00|none]")
+        matrix_rows.append(row)
+        vis_lines.append(f"Row {y}: " + " ".join(row_strs))
+
+    return {
+        "status": "success",
+        "resolution": list(processor.resolution),
+        "matrix": matrix_rows,
+        "visualization": "\n".join(vis_lines),
+        "total_cells": len(cells),
+    }
+
+
+def get_phase_signature_info(phase: str) -> dict[str, Any]:
+    """Inspects registration metadata, signatures, and documentation for a specific phase."""
+    from mangrove_platform.apparat.apparat import (
+        get_phase_handler,
+        get_phase_param_map,
+        get_phase_signature,
+    )
+
+    handler = get_phase_handler(phase)
+    if not handler:
+        return {"status": "error", "error": f"Phase '{phase}' is not registered in Apparat."}
+
+    signature = get_phase_signature(phase)
+    param_map = get_phase_param_map(phase)
+    sig_serialized = (
+        {k: getattr(v, "__name__", str(v)) for k, v in signature.items()} if signature else {}
+    )
+    doc = handler.__doc__.strip() if handler.__doc__ else "No docstring provided."
+
+    return {
+        "status": "success",
+        "phase": phase,
+        "signature": sig_serialized,
+        "param_map": param_map or [],
+        "description": doc,
+    }
+
+
 def is_approved_hook(handler_name: str) -> bool:
     """
     Validates if a given handler name is in the whitelist of approved Apparat hooks.

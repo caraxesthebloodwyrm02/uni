@@ -103,6 +103,18 @@ class HookRegistrationRequest(BaseModel):
     handler_name: str = Field(..., description="Name of the handler function to use.")
 
 
+class ConstraintSearchRequest(BaseModel):
+    """Request to search systemic constraints across the workspace."""
+
+    query: str | None = Field(None, description="Optional search term or regex filter.")
+
+
+class PhaseInspectionRequest(BaseModel):
+    """Request to inspect a phase handler's signature."""
+
+    phase: str = Field(..., pattern=r"^[a-zA-Z_]+$", description="Phase name to inspect.")
+
+
 class RateLimiter:
     """Fixed-window, in-memory rate limiter keyed by tool name.
 

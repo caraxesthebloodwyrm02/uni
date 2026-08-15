@@ -45,6 +45,34 @@ def test_search_constraints():
         print("[FAIL] Did not find dispatcher regex\n")
 
 
+def test_new_apparat_capabilities():
+    print("Testing new Apparat tools (matrix render, signature, reset)...")
+    from mangrove_platform.mcp.apparat_logic import (
+        get_phase_signature_info,
+        render_apparat_matrix,
+        reset_apparat_processor,
+    )
+
+    # 1. Test signature inspection
+    sig_info = get_phase_signature_info("scale")
+    assert sig_info["status"] == "success"
+    assert "factor" in sig_info["signature"]
+    print("[OK] Phase signature inspection verified")
+
+    # 2. Test matrix rendering
+    render_info = render_apparat_matrix(width=2, height=2)
+    assert render_info["status"] == "success"
+    assert len(render_info["matrix"]) == 2
+    assert "visualization" in render_info
+    print("[OK] Matrix rendering verified")
+
+    # 3. Test processor reset
+    reset_info = reset_apparat_processor(width=3, height=3)
+    assert reset_info["status"] == "success"
+    assert reset_info["resolution"] == [3, 3]
+    print("[OK] Processor reset verified\n")
+
+
 def test_gemini_declarations():
     print("Testing Gemini Interactions / Live API declarations & dispatcher...")
     from mangrove_platform.mcp.apparat_logic import (
@@ -69,6 +97,7 @@ if __name__ == "__main__":
         test_list_phases()
         test_run_phase()
         test_search_constraints()
+        test_new_apparat_capabilities()
         test_gemini_declarations()
         print("All tests passed!")
     except Exception as e:

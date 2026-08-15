@@ -46,11 +46,11 @@ uv run python scripts/check_large_files.py  (WIP: stub not yet implemented)  # 6
 
 ## MCP Server
 
-Server: `mangrove_platform/mcp/apparat_server.py` (Native `MCPServer`, 7 tools). Security
+Server: `mangrove_platform/mcp/apparat_server.py` (Native `MCPServer`, 10 tools). Security
 layer: `mangrove_platform/mcp/security.py` — Pydantic input validation, a
 fixed-window per-tool rate limiter with full-jitter exponential backoff, and structured audit
 logging. Every tool invocation passes `_gate()` (rate limit then validate), and
-state-mutating tools (`run_apparat_phase`, `run_apparat_pipeline`, `register_apparat_hook`) log
+state-mutating tools (`run_apparat_phase`, `run_apparat_pipeline`, `register_apparat_hook`, `reset_apparat_processor`) log
 invocations with status.
 
 | Tool | readOnly | destructive | idempotent | openWorld |
@@ -62,6 +62,10 @@ invocations with status.
 | `run_apparat_pipeline` | False | False | True | False |
 | `register_apparat_hook` | False | False | False | False |
 | `list_apparat_hooks` | True | False | True | False |
+| `search_constraints` | True | False | True | False |
+| `render_apparat_matrix` | True | False | True | False |
+| `get_phase_signature` | True | False | True | False |
+| `reset_apparat_processor` | False | True | True | False |
 
 Phase names are whitelisted (13 canonical phases in `security.py::ALLOWED_PHASES`);
 positional args like `scale:2.0` are allowed via the suffix pattern. Hook registration
