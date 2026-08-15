@@ -1,11 +1,14 @@
 """
 Apparat Subsystem (Mangrove Ecosystem)
 
-The foundational governance engine and granular texture-orchestration apparatus
-for the Mangrove platform. True to its lexical origins as a central administrative
-machinery, Apparat provides a deterministic, type-safe state machine that coordinates,
-transforms, and renders multi-dimensional grid matrices (GridCell) through disciplined,
-sequential execution phases.
+The foundational governance engine and granular texture-orchestration apparatus for the Mangrove
+platform.
+
+The naming pays homage to Sascha Ring, the Berlin-based electronic artist performing as Apparat
+(notable for the Netflix series Dark soundtrack). His track "Joel" held deep motivational and
+structural importance to the author during the initial coding of this system. This package
+consolidates all grid processing, texture transformations, and SISA health routines under a
+single named convention: apparat.
 """
 
 from .api import ApparatValidationError, GridCell, InputProcessOutput, Phase
