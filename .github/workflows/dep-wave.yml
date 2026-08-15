@@ -18,6 +18,9 @@ on:
           - major
           - all
 
+permissions:
+  pull-requests: read
+
 jobs:
   inventory:
     runs-on: ubuntu-latest
